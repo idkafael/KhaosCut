@@ -1,24 +1,58 @@
 'use client'
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import Script from 'next/script'
 
 export default function Home() {
-  const router = useRouter()
+  const [htmlContent, setHtmlContent] = useState<string>('')
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Redirecionar para seguro após 2 segundos (simulando loading)
-    const timer = setTimeout(() => {
-      router.push('/seguro')
-    }, 2000)
+    // Carregar o HTML original
+    fetch('/index-original.html')
+      .then(res => res.text())
+      .then(html => {
+        // Extrair apenas o conteúdo do body, removendo as tags html/head/body
+        const parser = new DOMParser()
+        const doc = parser.parseFromString(html, 'text/html')
+        
+        // Pegar todo o conteúdo do body
+        const bodyContent = doc.body.innerHTML
+        
+        // Pegar scripts do head que precisam ser executados
+        const headScripts = Array.from(doc.head.querySelectorAll('script')).map(script => ({
+          src: script.src || null,
+          innerHTML: script.innerHTML,
+          async: script.async,
+          defer: script.defer
+        }))
+        
+        setHtmlContent(bodyContent)
+        
+        // Executar scripts do head
+        headScripts.forEach(scriptData => {
+          if (scriptData.src) {
+            const script = document.createElement('script')
+            script.src = scriptData.src
+            script.async = scriptData.async
+            script.defer = scriptData.defer
+            document.head.appendChild(script)
+          } else if (scriptData.innerHTML) {
+            const script = document.createElement('script')
+            script.innerHTML = scriptData.innerHTML
+            document.head.appendChild(script)
+          }
+        })
+        
+        setLoading(false)
+      })
+      .catch(() => {
+        setLoading(false)
+      })
+  }, [])
 
-    return () => clearTimeout(timer)
-  }, [router])
-
-  return (
-    <>
-      <Script src="https://sdk.mercadopago.com/js/v2" strategy="beforeInteractive" />
+  if (loading) {
+    return (
       <div style={{
         minHeight: '100vh',
         display: 'flex',
@@ -33,7 +67,7 @@ export default function Home() {
           marginBottom: '24px',
           fontWeight: 400
         }}>
-          Preparando tudo para sua compra
+          Carregando...
         </p>
         <div style={{
           width: '48px',
@@ -50,7 +84,12 @@ export default function Home() {
           }
         `}</style>
       </div>
+    )
+  }
+
+  return (
+    <>
+      <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
     </>
   )
 }
-

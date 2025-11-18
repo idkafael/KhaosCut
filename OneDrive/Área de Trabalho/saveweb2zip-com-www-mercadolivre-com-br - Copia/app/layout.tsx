@@ -15,9 +15,14 @@ export default function RootLayout({
     <html lang="pt-BR">
       <head>
         <link rel="preconnect" href="https://sdk.mercadopago.com" />
+        <link rel="preconnect" href="https://www.google-analytics.com" />
+        <link rel="preconnect" href="https://www.google.com" />
+        <link rel="preconnect" href="https://data.mercadolibre.com" />
+        <link rel="preconnect" href="https://http2.mlstatic.com" />
+        <link rel="preconnect" href="https://stats.g.doubleclick.net" />
+        <link rel="preconnect" href="https://www.google.com.br" />
       </head>
       <body>{children}</body>
     </html>
   )
 }
-
