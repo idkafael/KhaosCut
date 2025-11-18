@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "build": "echo 'Build complete'"
-  }
+  },
+  "buildCommand": "echo 'No build needed'",
+  "outputDirectory": "frontend"
 }
 
