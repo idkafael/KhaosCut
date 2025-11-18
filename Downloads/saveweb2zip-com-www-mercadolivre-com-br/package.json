@@ -2,9 +2,7 @@
   "name": "curly-octo-enigma",
   "version": "1.0.0",
   "scripts": {
-    "build": "echo 'Build complete'"
-  },
-  "buildCommand": "echo 'No build needed'",
-  "outputDirectory": "frontend"
+    "build": "echo 'No build needed - files in frontend/'"
+  }
 }
 
