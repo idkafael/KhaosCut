@@ -14,35 +14,50 @@ export default function IndexContent({ htmlContent }: IndexContentProps) {
       return
     }
 
-    // Extrair apenas o conteúdo do body, removendo as tags html/head/body
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(htmlContent, 'text/html')
-    
-    // Pegar todo o conteúdo do body
-    const body = doc.body.innerHTML
-    setBodyContent(body)
-    
-    // Pegar scripts do head que precisam ser executados
-    const headScripts = Array.from(doc.head.querySelectorAll('script'))
-    
-    // Executar scripts do head
-    headScripts.forEach(script => {
-      if (script.src) {
-        const newScript = document.createElement('script')
-        newScript.src = script.src
-        newScript.async = script.async
-        newScript.defer = script.defer
-        if (!document.head.querySelector(`script[src="${script.src}"]`)) {
-          document.head.appendChild(newScript)
-        }
-      } else if (script.innerHTML) {
-        const newScript = document.createElement('script')
-        newScript.innerHTML = script.innerHTML
-        if (!document.head.querySelector(`script:not([src])`)) {
-          document.head.appendChild(newScript)
-        }
+    try {
+      // Extrair apenas o conteúdo do body, removendo as tags html/head/body
+      const parser = new DOMParser()
+      const doc = parser.parseFromString(htmlContent, 'text/html')
+      
+      // Verificar se há erros de parsing
+      const parserError = doc.querySelector('parsererror')
+      if (parserError) {
+        console.error('HTML parsing error:', parserError.textContent)
+        return
       }
-    })
+      
+      // Pegar todo o conteúdo do body
+      const body = doc.body?.innerHTML || ''
+      setBodyContent(body)
+      
+      // Pegar scripts do head que precisam ser executados
+      const headScripts = Array.from(doc.head.querySelectorAll('script'))
+      
+      // Executar scripts do head
+      headScripts.forEach(script => {
+        try {
+          if (script.src) {
+            const newScript = document.createElement('script')
+            newScript.src = script.src
+            newScript.async = script.async
+            newScript.defer = script.defer
+            if (!document.head.querySelector(`script[src="${script.src}"]`)) {
+              document.head.appendChild(newScript)
+            }
+          } else if (script.innerHTML) {
+            const newScript = document.createElement('script')
+            newScript.innerHTML = script.innerHTML
+            if (!document.head.querySelector(`script:not([src])`)) {
+              document.head.appendChild(newScript)
+            }
+          }
+        } catch (scriptError) {
+          console.error('Error loading script:', scriptError)
+        }
+      })
+    } catch (error) {
+      console.error('Error processing HTML:', error)
+    }
   }, [htmlContent])
 
   if (!htmlContent) {

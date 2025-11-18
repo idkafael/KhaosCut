@@ -8,8 +8,9 @@ export default async function Home() {
   try {
     const filePath = join(process.cwd(), 'public', 'index-original.html')
     htmlContent = await readFile(filePath, 'utf-8')
-  } catch (error) {
-    console.error('Error reading HTML file:', error)
+  } catch (error: any) {
+    console.error('Error reading HTML file:', error?.message || error)
+    // Fallback: retornar HTML vazio para mostrar mensagem de erro
   }
 
   return <IndexContent htmlContent={htmlContent} />
