@@ -136,11 +136,18 @@ export default function Home() {
           left: 0;
         }
         .media-blur {
-          filter: blur(5px);
+          filter: blur(8px);
           transition: filter 0.3s ease;
         }
         .media-item:hover .media-blur {
-          filter: blur(1px);
+          filter: blur(4px);
+        }
+        .blur-5 {
+          filter: blur(8px) !important;
+          transition: filter 0.3s ease;
+        }
+        .media-item:hover .blur-5 {
+          filter: blur(4px) !important;
         }
         .media-overlay {
           background: linear-gradient(45deg, rgba(0,0,0,0.3), rgba(255,165,0,0.2));
@@ -182,7 +189,7 @@ export default function Home() {
         {/* Banner Image */}
         <img 
           className="w-full h-64 object-cover" 
-          src="https://i.imgur.com/ce3TQym.jpg" 
+          src="https://i.imgur.com/enNEwJK.jpg" 
           alt="Banner"
           loading="eager"
         />
@@ -219,7 +226,7 @@ export default function Home() {
           <div className="flex justify-start -mt-16 mb-4">
             <img 
               className="h-24 w-24 rounded-full border-4 border-white object-cover" 
-              src="https://i.imgur.com/H12uGdK.jpg" 
+              src="https://i.imgur.com/3U2g3CB.jpg" 
               alt="Perfil"
               loading="eager"
             />
@@ -237,21 +244,8 @@ export default function Home() {
           {/* Description */}
           <div className="text-gray-800 text-sm -mt-2">
             <p className="mb-0">
-              Oi, papai 🎀 Sou a Mar, bem-vindo ao meu cantinho secreto!❤️
+              Sou uma safada de 19 aninhos e aqui mostro meu lado putinha com tudo liberado, conteúdo transando, chupando, masturbando, gozando e tudo, além de conversas picantes no chat, onde vc pode me pedir vídeos personalizados e fazer chamadas excitantes, vem gozar gostoso comigo mo😈💦💦
             </p>
-            <p className="mb-0">
-              Sou uma garotinha de 18 anos 🍭
-            </p>
-            <p className="mb-0">
-              Estou procurando alguém com quem eu possa ter intimidade e compartilhar bons momentos 🥰
-            </p>
-            <div>
-              <p className="font-semibold mb-1">💤 Publicações diárias</p>
-              <p className="font-semibold mb-1">🧴 Vídeos explícitos completos</p>
-              <p className="font-semibold mb-1">🍭 Pedidos adultos +18</p>
-              <p className="font-semibold mb-1">🧸 Sexting picante</p>
-              <p className="font-semibold">🍒 Plug anal, lingeries e vibradores</p>
-            </div>
           </div>
           
           {/* Social Media Links */}
@@ -282,6 +276,11 @@ export default function Home() {
             <button onClick={() => handlePayment(19.90, '1 Mês')} className="w-full subscription-gradient text-black py-4 px-6 rounded-2xl font-medium transition-all mb-2 flex justify-between items-center shadow-sm">
               <span>1 Mês</span>
               <span>R$ 19,90</span>
+            </button>
+            
+            {/* Chamada de Vídeo */}
+            <button className="w-full bg-orange-100 hover:bg-orange-200 text-black py-2.5 px-4 rounded-xl font-medium transition-all mb-2 text-sm uppercase flex items-center justify-center shadow-sm">
+              <span>+ CHAMADA DE VÍDEO COMIGO HOJE!</span>
             </button>
           </div>
           
@@ -353,7 +352,7 @@ export default function Home() {
           <div className="content-transition">
             {/* Profile Section */}
             <div className="flex items-center mb-6">
-              <img className="h-12 w-12 rounded-full object-cover mr-4" src="https://i.imgur.com/H12uGdK.jpg" alt="Profile" />
+              <img className="h-12 w-12 rounded-full object-cover mr-4" src="https://i.imgur.com/3U2g3CB.jpg" alt="Profile" />
               <div className="flex-1">
                 <div className="flex items-center">
                   <h3 className="text-lg font-bold text-gray-900">Marcelly Mar 😘</h3>
@@ -397,7 +396,7 @@ export default function Home() {
                 }}
                 className="w-full h-full object-cover" 
                 style={{ filter: 'blur(8px)' }} 
-                src="https://i.imgur.com/QEH5y1P.mp4"
+                src="https://i.imgur.com/pYRTy5I.mp4"
                 muted
                 loop
                 playsInline
