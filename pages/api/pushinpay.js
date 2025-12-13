@@ -171,27 +171,59 @@ export default async function handler(req, res) {
       try {
         // Base URL da API PushinPay conforme documentação
         const apiBaseUrl = 'https://api.pushinpay.com.br/api';
-        const endpoint = `/transaction/${transactionId}`;
-        const url = `${apiBaseUrl}${endpoint}`;
+        // Tentar diferentes endpoints possíveis
+        const endpointsPossiveis = [
+          `/transaction/${transactionId}`,
+          `/pix/transaction/${transactionId}`,
+          `/pix/${transactionId}`
+        ];
+        
+        let statusData = null;
+        let response = null;
+        let urlUsado = null;
+        
+        // Tentar cada endpoint até encontrar um que funcione
+        for (const endpoint of endpointsPossiveis) {
+          const url = `${apiBaseUrl}${endpoint}`;
+          console.log(`🔍 Tentando consultar status na PushinPay: ${url}`);
+          
+          try {
+            response = await fetch(url, {
+              method: 'GET',
+              headers: {
+                'Authorization': `Bearer ${apiToken}`,
+                'Accept': 'application/json'
+              }
+            });
 
-        console.log(`Consultando status do PIX na PushinPay: ${url}`);
+            console.log(`📥 Status da resposta HTTP (${endpoint}):`, response.status, response.statusText);
 
-        // Fazer requisição direta à API conforme documentação
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${apiToken}`,
-            'Accept': 'application/json'
+            if (response.status === 200) {
+              urlUsado = url;
+              console.log(`✅ Endpoint correto encontrado: ${url}`);
+              break; // Endpoint correto encontrado
+            } else if (response.status === 404) {
+              console.log(`⚠️ Endpoint ${endpoint} retornou 404, tentando próximo...`);
+              continue; // Tentar próximo endpoint
+            } else {
+              // Outro erro - tentar próximo endpoint
+              console.log(`⚠️ Endpoint ${endpoint} retornou ${response.status}, tentando próximo...`);
+              continue;
+            }
+          } catch (fetchError) {
+            console.error(`❌ Erro ao consultar ${endpoint}:`, fetchError.message);
+            continue; // Tentar próximo endpoint
           }
-        });
+        }
 
-        console.log('📥 Status da resposta HTTP:', response.status, response.statusText);
-
-        if (response.status === 404) {
-          console.log('⚠️ Transação não encontrada na PushinPay (404)');
+        // Se nenhum endpoint funcionou, retornar 404
+        if (!response || response.status !== 200) {
+          console.log('⚠️ Nenhum endpoint funcionou. Transação pode ainda não estar disponível na API.');
           return res.status(404).json({
             error: 'Transação não encontrada',
-            message: 'A transação não foi encontrada'
+            message: 'A transação não foi encontrada. Pode levar alguns segundos para aparecer na API.',
+            transactionId: transactionId,
+            endpointsTentados: endpointsPossiveis
           });
         }
 

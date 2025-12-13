@@ -299,17 +299,29 @@ const PushinPayReal = {
     let tentativas = 0;
     const maxTentativas = 300;
     let ultimaConsulta = 0;
+    let primeiraVerificacao = true;
+
+    // Delay inicial de 5 segundos para dar tempo da transação aparecer na API
+    setTimeout(() => {
+      primeiraVerificacao = false;
+    }, 5000);
 
     this.estado.intervaloVerificacao = setInterval(async () => {
       tentativas++;
 
       const agora = Date.now();
       const tempoDesdeUltimaConsulta = agora - ultimaConsulta;
-      const intervaloMinimo = 10000; // 10 segundos entre consultas
+      const intervaloMinimo = primeiraVerificacao ? 5000 : 10000; // 5s na primeira, depois 10s
 
       if (tempoDesdeUltimaConsulta < intervaloMinimo && ultimaConsulta > 0) {
         const tempoRestante = intervaloMinimo - tempoDesdeUltimaConsulta;
         console.log(`⏳ Aguardando ${Math.ceil(tempoRestante / 1000)}s antes da próxima consulta`);
+        return;
+      }
+
+      // Aguardar delay inicial antes da primeira verificação
+      if (primeiraVerificacao) {
+        console.log('⏳ Aguardando 5s para primeira verificação (transação pode demorar para aparecer na API)...');
         return;
       }
 
@@ -336,14 +348,26 @@ const PushinPayReal = {
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
+          
+          if (response.status === 404) {
+            // 404 é normal nas primeiras tentativas - a transação pode demorar para aparecer na API
+            if (tentativas <= 10) {
+              console.log(`⏳ Transação ainda não encontrada na API (tentativa ${tentativas}/10 - aguardando propagação)...`);
+            } else {
+              console.warn(`⚠️ Transação ainda não encontrada após ${tentativas} tentativas. Continuando verificação...`);
+            }
+            // Não retornar - continuar tentando
+            ultimaConsulta = Date.now();
+            return;
+          }
+          
           console.error('Erro ao verificar pagamento:', {
             status: response.status,
             error: errorData.error || errorData.message || 'Erro desconhecido'
           });
-
-          if (response.status === 404) {
-            console.log('⏳ Transação ainda não encontrada na API (aguardando criação)...');
-          }
+          
+          // Para outros erros, também continuar tentando (pode ser temporário)
+          ultimaConsulta = Date.now();
           return;
         }
 
