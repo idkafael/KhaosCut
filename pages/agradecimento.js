@@ -14,10 +14,10 @@ export default function Agradecimento() {
   return (
     <>
       <Head>
-        <title>Pagamento Confirmado - Marcelly Mar</title>
+        <title>Pagamento Confirmado - Luna Alves</title>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="description" content="Pagamento confirmado! Acesse seu conteúdo exclusivo da Marcelly Mar." />
+        <meta name="description" content="Pagamento confirmado! Acesse seu conteúdo exclusivo da Luna Alves." />
         <meta name="robots" content="noindex, nofollow" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
       </Head>
@@ -86,7 +86,7 @@ export default function Agradecimento() {
               </svg>
             </div>
             <h1 className="text-3xl font-bold mt-4 mb-2">Pagamento Confirmado!</h1>
-            <p className="text-green-100">Obrigado por assinar o conteúdo da Marcelly Mar</p>
+            <p className="text-green-100">Obrigado por assinar o conteúdo da Luna Alves</p>
           </div>
           
           {/* Conteúdo Principal */}
@@ -125,7 +125,7 @@ export default function Agradecimento() {
               
               {/* Botão Principal - Entregável */}
               <a 
-                href="https://privacycombrcheckoutluna.shop"
+                href="https://www.luninhalves.shop/*"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-5 px-6 rounded-lg hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105 pulse-animation text-center focus:outline-none focus:ring-4 focus:ring-orange-300 mb-3"
@@ -137,17 +137,6 @@ export default function Agradecimento() {
                   </svg>
                   <span>🔓 ACESSAR CONTEÚDO EXCLUSIVO</span>
                 </div>
-              </a>
-              
-              {/* Botão Secundário - Google Drive */}
-              <a 
-                href="https://drive.google.com/drive/folders/1ff951SXT9sZRmwGwwvoHh6ePr4_Y2fDo?usp=sharing"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full bg-gray-100 text-gray-700 font-semibold py-3 px-6 rounded-lg hover:bg-gray-200 transition-all text-center"
-                aria-label="Acessar conteúdo no Google Drive"
-              >
-                📁 Acessar via Google Drive
               </a>
             </div>
             
