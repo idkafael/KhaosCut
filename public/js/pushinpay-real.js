@@ -328,6 +328,10 @@ const PushinPayReal = {
 
         ultimaConsulta = agora;
         try {
+          console.log('🔍 Verificando pagamento com Transaction ID:', this.estado.transactionId);
+          console.log('🔍 URL da API:', `${this.config.baseUrl}/pushinpay`);
+          console.log('🔍 Tentativa:', tentativas);
+          
           const response = await fetch(`${this.config.baseUrl}/pushinpay`, {
             method: 'POST',
             headers: {

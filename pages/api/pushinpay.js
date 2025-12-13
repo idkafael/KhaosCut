@@ -171,46 +171,68 @@ export default async function handler(req, res) {
       try {
         // Base URL da API PushinPay conforme documentação
         const apiBaseUrl = 'https://api.pushinpay.com.br/api';
-        // Tentar diferentes endpoints possíveis
+        // Tentar diferentes endpoints possíveis com diferentes métodos
         const endpointsPossiveis = [
-          `/transaction/${transactionId}`,
-          `/pix/transaction/${transactionId}`,
-          `/pix/${transactionId}`
+          { path: `/transaction/${transactionId}`, method: 'GET' },
+          { path: `/pix/transaction/${transactionId}`, method: 'GET' },
+          { path: `/pix/${transactionId}`, method: 'GET' },
+          { path: `/pix/transaction/${transactionId}`, method: 'POST' },
+          { path: `/transaction/${transactionId}`, method: 'POST' },
+          { path: `/pix/status`, method: 'POST' }
         ];
         
         let response = null;
         let urlUsado = null;
+        let methodUsado = null;
+        
+        console.log(`🔍 Consultando transação com ID: ${transactionId}`);
         
         // Tentar cada endpoint até encontrar um que funcione
-        for (const endpoint of endpointsPossiveis) {
-          const url = `${apiBaseUrl}${endpoint}`;
-          console.log(`🔍 Tentando consultar status na PushinPay: ${url}`);
+        for (const endpointConfig of endpointsPossiveis) {
+          const url = `${apiBaseUrl}${endpointConfig.path}`;
+          console.log(`🔍 Tentando consultar status na PushinPay: ${endpointConfig.method} ${url}`);
           
           try {
-            response = await fetch(url, {
-              method: 'GET',
+            const fetchOptions = {
+              method: endpointConfig.method,
               headers: {
                 'Authorization': `Bearer ${apiToken}`,
                 'Accept': 'application/json'
               }
-            });
+            };
+            
+            // Se for POST e o endpoint for /pix/status, enviar ID no body
+            if (endpointConfig.method === 'POST' && endpointConfig.path === '/pix/status') {
+              fetchOptions.headers['Content-Type'] = 'application/json';
+              fetchOptions.body = JSON.stringify({ id: transactionId });
+            } else if (endpointConfig.method === 'POST') {
+              fetchOptions.headers['Content-Type'] = 'application/json';
+              fetchOptions.body = JSON.stringify({ transaction_id: transactionId });
+            }
+            
+            response = await fetch(url, fetchOptions);
 
-            console.log(`📥 Status da resposta HTTP (${endpoint}):`, response.status, response.statusText);
+            console.log(`📥 Status da resposta HTTP (${endpointConfig.method} ${endpointConfig.path}):`, response.status, response.statusText);
 
             if (response.status === 200) {
               urlUsado = url;
-              console.log(`✅ Endpoint correto encontrado: ${url}`);
+              methodUsado = endpointConfig.method;
+              console.log(`✅ Endpoint correto encontrado: ${endpointConfig.method} ${url}`);
               break; // Endpoint correto encontrado
             } else if (response.status === 404) {
-              console.log(`⚠️ Endpoint ${endpoint} retornou 404, tentando próximo...`);
+              const responseText = await response.text().catch(() => '');
+              console.log(`⚠️ Endpoint ${endpointConfig.method} ${endpointConfig.path} retornou 404`);
+              if (responseText) {
+                console.log(`📄 Resposta (primeiros 200 chars): ${responseText.substring(0, 200)}`);
+              }
               continue; // Tentar próximo endpoint
             } else {
               // Outro erro - tentar próximo endpoint
-              console.log(`⚠️ Endpoint ${endpoint} retornou ${response.status}, tentando próximo...`);
+              console.log(`⚠️ Endpoint ${endpointConfig.method} ${endpointConfig.path} retornou ${response.status}, tentando próximo...`);
               continue;
             }
           } catch (fetchError) {
-            console.error(`❌ Erro ao consultar ${endpoint}:`, fetchError.message);
+            console.error(`❌ Erro ao consultar ${endpointConfig.method} ${endpointConfig.path}:`, fetchError.message);
             continue; // Tentar próximo endpoint
           }
         }
@@ -218,11 +240,12 @@ export default async function handler(req, res) {
         // Se nenhum endpoint funcionou, retornar 404
         if (!response || response.status !== 200) {
           console.log('⚠️ Nenhum endpoint funcionou. Transação pode ainda não estar disponível na API.');
+          console.log(`⚠️ Transaction ID usado: ${transactionId}`);
           return res.status(404).json({
             error: 'Transação não encontrada',
             message: 'A transação não foi encontrada. Pode levar alguns segundos para aparecer na API.',
             transactionId: transactionId,
-            endpointsTentados: endpointsPossiveis
+            endpointsTentados: endpointsPossiveis.map(e => `${e.method} ${e.path}`)
           });
         }
 
