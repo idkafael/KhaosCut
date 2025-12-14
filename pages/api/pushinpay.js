@@ -361,17 +361,40 @@ export default async function handler(req, res) {
           });
         }
 
+        // Extrair status de múltiplos campos possíveis
+        let status = statusData.status || 
+                     statusData.payment_status || 
+                     statusData.state ||
+                     statusData.situation ||
+                     'pending';
+        
+        // Verificar se há campos que indicam pagamento mesmo sem status explícito
+        const hasPaidAt = statusData.paid_at || statusData.payment_date || statusData.paidAt;
+        const hasPaymentValue = statusData.paid_value || statusData.payment_value;
+        
+        // Se tiver data de pagamento mas status não indicar pago, considerar como pago
+        if (hasPaidAt && (status === 'pending' || status === 'created')) {
+          console.log('🔍 Detectado campo paid_at/data de pagamento - considerando como pago');
+          status = 'paid';
+        }
+
+        // Normalizar status para lowercase
+        status = (status || '').toLowerCase();
+
         const adaptedResponse = {
           success: true,
           hash: statusData.id || transactionId,
           identifier: statusData.id || transactionId,
-          status: statusData.status || 'pending', // created | paid | canceled
-          amount: statusData.value || statusData.amount,
+          status: status, // created | paid | canceled | pending
+          amount: statusData.value || statusData.amount || statusData.paid_value,
           payment_method: 'pix',
-          paid_at: statusData.paid_at || statusData.payment_date,
+          paid_at: statusData.paid_at || statusData.payment_date || statusData.paidAt,
           created_at: statusData.created_at,
-          data: statusData
+          data: statusData // Incluir dados completos para debug
         };
+        
+        console.log('📊 Status extraído:', status);
+        console.log('📊 Response adaptado:', JSON.stringify(adaptedResponse, null, 2));
         
         clearTimeout(timeout);
         return res.status(200).json(adaptedResponse);

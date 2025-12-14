@@ -388,23 +388,36 @@ const PushinPayReal = {
 
           const data = await response.json();
           const transactionData = data.data || data;
-          let status = (data.status || transactionData.status)?.toLowerCase();
+          
+          // Extrair status de múltiplos campos possíveis
+          let status = (data.status || transactionData.status || 'pending')?.toLowerCase();
+          
+          // Verificar campos adicionais que indicam pagamento
+          const hasPaidAt = data.paid_at || transactionData.paid_at || data.payment_date || transactionData.payment_date;
+          const hasPaidValue = data.paid_value || transactionData.paid_value;
+          
+          // Se tiver data de pagamento, considerar como pago mesmo se status não indicar
+          if (hasPaidAt && (status === 'pending' || status === 'created')) {
+            console.log('🔍 Detectado campo paid_at - considerando como pago');
+            status = 'paid';
+          }
           
           if (!status || status === 'unknown') {
             status = 'pending';
           }
           
-          // Log apenas se não for pending (para não poluir o console)
-          if (status !== 'pending') {
-            console.log('📊 Resposta completa da API:', data);
-            console.log('📊 Status do pagamento PushinPay:', status);
-            console.log('📊 TransactionData:', transactionData);
-          } else if (tentativas % 10 === 0) {
-            // Log a cada 10 tentativas quando estiver pending
-            console.log(`⏳ Aguardando pagamento... (verificação ${tentativas}/300)`);
-          }
+          // SEMPRE logar quando receber resposta (para debug)
+          console.log('📊 Resposta completa da API:', JSON.stringify(data, null, 2));
+          console.log('📊 Status do pagamento:', status);
+          console.log('📊 Tem paid_at?', hasPaidAt);
+          console.log('📊 TransactionData:', transactionData);
 
-          const isPagamentoConfirmado = status === 'paid' || status === 'approved' || status === 'confirmed';
+          const isPagamentoConfirmado = 
+            status === 'paid' || 
+            status === 'approved' || 
+            status === 'confirmed' ||
+            status === 'pago' ||
+            hasPaidAt; // Se tiver data de pagamento, considerar pago
 
           if (isPagamentoConfirmado) {
             console.log('✅✅✅ PAGAMENTO CONFIRMADO! Redirecionando para agradecimento...');
