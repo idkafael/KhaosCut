@@ -333,19 +333,30 @@ const PushinPayReal = {
 
         ultimaConsulta = agora;
         try {
-          console.log('🔍 Verificando status via webhook (endpoint local):', this.estado.transactionId);
+          console.log('🔍 Verificando status do pagamento:', this.estado.transactionId);
           console.log('🔍 Tentativa:', tentativas);
           
-          // Consultar endpoint local que é atualizado pelo webhook
-          // Isso é muito mais rápido e confiável do que consultar a API PushinPay
-          const response = await fetch(`${this.config.baseUrl}/payment-status?transactionId=${encodeURIComponent(this.estado.transactionId)}`, {
-            method: 'GET',
+          // Consultar status diretamente na API PushinPay via endpoint local
+          const response = await fetch(`${this.config.baseUrl}/pushinpay`, {
+            method: 'POST',
             headers: {
+              'Content-Type': 'application/json',
               'Accept': 'application/json'
-            }
+            },
+            body: JSON.stringify({
+              action: 'check-payment',
+              transactionId: this.estado.transactionId
+            })
           });
 
           if (!response.ok) {
+            // 404 é esperado quando a transação ainda não foi propagada
+            if (response.status === 404) {
+              console.log('⏳ Transação ainda não encontrada na API (404) - aguardando...');
+              ultimaConsulta = Date.now();
+              return;
+            }
+            
             const errorData = await response.json().catch(() => ({}));
             console.error('Erro ao verificar status:', {
               status: response.status,
@@ -357,31 +368,26 @@ const PushinPayReal = {
 
           const data = await response.json();
           
-          // O endpoint /payment-status retorna: { success, source, status, confirmed, ... }
+          // O endpoint check-payment retorna: { success, status, amount, paid_at, ... }
           const status = (data.status || 'pending')?.toLowerCase();
-          const isConfirmed = data.confirmed === true;
           const hasPaidAt = data.paid_at || data.paidAt;
-          const source = data.source || 'unknown';
           
           // Log apenas quando necessário (para não poluir o console)
           if (status !== 'pending' || tentativas % 10 === 0) {
             console.log('📊 Status consultado:', {
               transactionId: this.estado.transactionId,
               status,
-              confirmed: isConfirmed,
-              source,
               tentativa: tentativas
             });
           }
 
           // Verificar se o pagamento foi confirmado
           const isPagamentoConfirmado = 
-            isConfirmed || 
             status === 'paid' || 
             status === 'approved' || 
             status === 'confirmed' ||
             status === 'pago' ||
-            hasPaidAt
+            !!hasPaidAt
 
           if (isPagamentoConfirmado) {
             console.log('✅✅✅ PAGAMENTO CONFIRMADO! Redirecionando para agradecimento...');
@@ -392,14 +398,15 @@ const PushinPayReal = {
               detail: {
                 transactionId: this.estado.transactionId,
                 status: status,
-                value: data.amount || this.estado.valorAtual / 100
+                value: data.amount ? (data.amount / 100) : (this.estado.valorAtual / 100)
               }
             }));
 
             if (typeof fbq !== 'undefined') {
               try {
+                const valorFinal = data.amount ? (data.amount / 100) : (this.estado.valorAtual / 100);
                 fbq('track', 'Purchase', {
-                  value: this.estado.valorAtual / 100,
+                  value: valorFinal,
                   currency: 'BRL',
                   content_name: this.config.planoAtual
                 });
@@ -409,7 +416,8 @@ const PushinPayReal = {
               }
             }
 
-            const valorFormatado = (this.estado.valorAtual / 100).toFixed(2).replace('.', ',');
+            const valorFinal = data.amount ? (data.amount / 100) : (this.estado.valorAtual / 100);
+            const valorFormatado = valorFinal.toFixed(2).replace('.', ',');
             const urlParams = new URLSearchParams();
             urlParams.set('id', this.estado.transactionId);
             urlParams.set('valor', valorFormatado);

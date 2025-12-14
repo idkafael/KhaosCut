@@ -8,16 +8,6 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método não permitido' });
   }
 
-  // Timeout geral de 30 segundos para evitar requisições travadas
-  const timeout = setTimeout(() => {
-    if (!res.headersSent) {
-      res.status(408).json({ 
-        error: 'Request Timeout',
-        message: 'A requisição demorou muito para ser processada'
-      });
-    }
-  }, 30000); // 30 segundos
-
   const { action } = req.body;
 
   try {
@@ -49,13 +39,9 @@ export default async function handler(req, res) {
         ? `${process.env.NEXT_PUBLIC_SITE_URL}/api/webhook-pushinpay`
         : undefined;
 
-      // Configurar URL de redirecionamento/entregável
-      const redirectUrl = process.env.PUSHINPAY_REDIRECT_URL || 'https://privacycombrcheckoutluna.shop';
-
       console.log('Criando transação via PushinPay:', {
         valorCentavos: valorFinalCentavos,
-        plano,
-        redirectUrl
+        plano
       });
 
       try {
@@ -67,8 +53,7 @@ export default async function handler(req, res) {
         // Preparar payload conforme documentação
         const payload = {
           value: valorFinalCentavos, // Valor em centavos (INT, mínimo 50)
-          ...(webhookUrl && { webhook_url: webhookUrl }),
-          ...(redirectUrl && { redirect_url: redirectUrl })
+          ...(webhookUrl && { webhook_url: webhookUrl })
         };
 
         console.log('📤 Payload enviado para PushinPay:', JSON.stringify(payload, null, 2));
@@ -132,23 +117,6 @@ export default async function handler(req, res) {
           });
         }
 
-        // Logs detalhados para debug
-        console.log('🔍 Campos disponíveis na resposta:', Object.keys(pixData));
-        console.log('🔍 ID da transação:', pixData.id);
-        const camposRelevantes = Object.keys(pixData).filter(k => 
-          k.toLowerCase().includes('id') || 
-          k.toLowerCase().includes('transaction') ||
-          k.toLowerCase().includes('uuid') ||
-          k.toLowerCase().includes('hash') ||
-          k.toLowerCase().includes('identifier')
-        );
-        console.log('🔍 Campos relacionados a ID/Transaction:', camposRelevantes);
-        if (camposRelevantes.length > 0) {
-          camposRelevantes.forEach(campo => {
-            console.log(`🔍 ${campo}:`, pixData[campo]);
-          });
-        }
-
         // Adaptar resposta para formato compatível com frontend
         // Documentação: { id, qr_code, status, value, qr_code_base64, ... }
         const adaptedResponse = {
@@ -162,22 +130,15 @@ export default async function handler(req, res) {
           payment_method: 'pix',
           expires_at: pixData.expires_at,
           created_at: pixData.created_at || new Date().toISOString(),
-          data: pixData,
-          // Incluir todos os campos possíveis de ID para consulta futura
-          possibleIds: camposRelevantes.reduce((acc, campo) => {
-            if (pixData[campo]) acc[campo] = pixData[campo];
-            return acc;
-          }, {})
+          data: pixData
         };
 
         console.log('✅ Transação criada com sucesso via PushinPay:', adaptedResponse);
         
-        clearTimeout(timeout);
         return res.status(200).json(adaptedResponse);
       } catch (error) {
         console.error('❌ Erro ao criar PIX via PushinPay:', error);
         
-        clearTimeout(timeout);
         return res.status(500).json({
           error: error.message || 'Erro ao criar PIX',
           message: error.message || 'Erro ao criar PIX',
@@ -187,7 +148,7 @@ export default async function handler(req, res) {
     }
 
     if (action === 'check-payment') {
-      const { transactionId, possibleIds } = req.body;
+      const { transactionId } = req.body;
 
       if (!transactionId) {
         return res.status(400).json({ error: 'transactionId é obrigatório' });
@@ -205,126 +166,27 @@ export default async function handler(req, res) {
       try {
         // Base URL da API PushinPay conforme documentação
         const apiBaseUrl = 'https://api.pushinpay.com.br/api';
-        
-        // Coletar todos os IDs possíveis para tentar
-        const idsParaTentar = [transactionId];
-        if (possibleIds && typeof possibleIds === 'object') {
-          Object.values(possibleIds).forEach(id => {
-            if (id && id !== transactionId) {
-              idsParaTentar.push(id);
-            }
-          });
-        }
-        
-        console.log(`🔍 Consultando transação com IDs possíveis:`, idsParaTentar);
-        
-        // Tentar diferentes endpoints possíveis com diferentes métodos e IDs
-        const endpointsPossiveis = [];
-        
-        // Para cada ID, criar combinações de endpoints
-        idsParaTentar.forEach(id => {
-          endpointsPossiveis.push(
-            { path: `/transaction/${id}`, method: 'GET', id: id },
-            { path: `/pix/transaction/${id}`, method: 'GET', id: id },
-            { path: `/pix/${id}`, method: 'GET', id: id },
-            { path: `/pix/transaction/${id}`, method: 'POST', id: id },
-            { path: `/transaction/${id}`, method: 'POST', id: id }
-          );
-        });
-        
-        // Adicionar endpoint genérico de status
-        endpointsPossiveis.push({ path: `/pix/status`, method: 'POST', id: transactionId });
-        
-        let response = null;
-        let urlUsado = null;
-        let methodUsado = null;
-        let idUsado = null;
-        
-        // Tentar cada endpoint até encontrar um que funcione
-        for (const endpointConfig of endpointsPossiveis) {
-          const url = `${apiBaseUrl}${endpointConfig.path}`;
-          console.log(`🔍 Tentando consultar status na PushinPay: ${endpointConfig.method} ${url}`);
-          
-          try {
-            // Criar AbortController para timeout individual de 5 segundos por endpoint
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 segundos por endpoint
-            
-            const fetchOptions = {
-              method: endpointConfig.method,
-              headers: {
-                'Authorization': `Bearer ${apiToken}`,
-                'Accept': 'application/json'
-              },
-              signal: controller.signal
-            };
-            
-            // Se for POST e o endpoint for /pix/status, enviar ID no body
-            const idParaUsar = endpointConfig.id || transactionId;
-            if (endpointConfig.method === 'POST' && endpointConfig.path === '/pix/status') {
-              fetchOptions.headers['Content-Type'] = 'application/json';
-              fetchOptions.body = JSON.stringify({ id: idParaUsar });
-            } else if (endpointConfig.method === 'POST') {
-              fetchOptions.headers['Content-Type'] = 'application/json';
-              // Tentar diferentes formatos de body
-              fetchOptions.body = JSON.stringify({ 
-                transaction_id: idParaUsar,
-                id: idParaUsar,
-                transactionId: idParaUsar
-              });
-            }
-            
-            response = await fetch(url, fetchOptions);
-            clearTimeout(timeoutId); // Limpar timeout se a requisição completou
+        const endpoint = `/transaction/${transactionId}`;
+        const url = `${apiBaseUrl}${endpoint}`;
 
-            console.log(`📥 Status da resposta HTTP (${endpointConfig.method} ${endpointConfig.path}):`, response.status, response.statusText);
+        console.log(`Consultando status do PIX na PushinPay: ${url}`);
 
-            if (response.status === 200) {
-              urlUsado = url;
-              methodUsado = endpointConfig.method;
-              idUsado = idParaUsar;
-              console.log(`✅ Endpoint correto encontrado: ${endpointConfig.method} ${url}`);
-              console.log(`✅ ID usado com sucesso: ${idUsado}`);
-              break; // Endpoint correto encontrado
-            } else if (response.status === 404) {
-              const responseText = await response.text().catch(() => '');
-              console.log(`⚠️ Endpoint ${endpointConfig.method} ${endpointConfig.path} retornou 404`);
-              if (responseText) {
-                console.log(`📄 Resposta (primeiros 200 chars): ${responseText.substring(0, 200)}`);
-              }
-              continue; // Tentar próximo endpoint
-            } else {
-              // Outro erro - tentar próximo endpoint
-              console.log(`⚠️ Endpoint ${endpointConfig.method} ${endpointConfig.path} retornou ${response.status}, tentando próximo...`);
-              continue;
-            }
-          } catch (fetchError) {
-            // Tratar timeout especificamente
-            if (fetchError.name === 'AbortError' || fetchError.name === 'TimeoutError') {
-              console.log(`⏱️ Timeout ao consultar ${endpointConfig.method} ${endpointConfig.path} (5s) - tentando próximo endpoint...`);
-            } else {
-              console.error(`❌ Erro ao consultar ${endpointConfig.method} ${endpointConfig.path}:`, fetchError.message);
-            }
-            continue; // Tentar próximo endpoint
+        // Fazer requisição direta à API conforme documentação
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${apiToken}`,
+            'Accept': 'application/json'
           }
-        }
+        });
 
-        // Se nenhum endpoint funcionou, retornar 200 com status "pending" (não é erro, é comportamento esperado)
-        if (!response || response.status !== 200) {
-          console.log('⏳ Transação ainda não encontrada na API PushinPay. Aguardando propagação...');
-          console.log(`🔍 IDs tentados:`, idsParaTentar);
-          console.log(`🔍 Total de tentativas: ${endpointsPossiveis.length} endpoints`);
-          clearTimeout(timeout);
-          // Retornar 200 com status "pending" para evitar erro 404 no console do navegador
-          return res.status(200).json({
-            success: true,
-            hash: transactionId,
-            identifier: transactionId,
-            status: 'pending', // Status indicando que ainda está aguardando
-            message: 'A transação ainda não foi encontrada na API. Isso é normal e pode levar alguns segundos.',
-            transactionId: transactionId,
-            idsTentados: idsParaTentar,
-            endpointsTentados: endpointsPossiveis.map(e => `${e.method} ${e.path} (ID: ${e.id})`).slice(0, 10) // Limitar a 10 para não ficar muito grande
+        console.log('📥 Status da resposta HTTP:', response.status, response.statusText);
+
+        if (response.status === 404) {
+          console.log('⚠️ Transação não encontrada na PushinPay (404)');
+          return res.status(404).json({
+            error: 'Transação não encontrada',
+            message: 'A transação não foi encontrada'
           });
         }
 
@@ -361,47 +223,22 @@ export default async function handler(req, res) {
           });
         }
 
-        // Extrair status de múltiplos campos possíveis
-        let status = statusData.status || 
-                     statusData.payment_status || 
-                     statusData.state ||
-                     statusData.situation ||
-                     'pending';
-        
-        // Verificar se há campos que indicam pagamento mesmo sem status explícito
-        const hasPaidAt = statusData.paid_at || statusData.payment_date || statusData.paidAt;
-        const hasPaymentValue = statusData.paid_value || statusData.payment_value;
-        
-        // Se tiver data de pagamento mas status não indicar pago, considerar como pago
-        if (hasPaidAt && (status === 'pending' || status === 'created')) {
-          console.log('🔍 Detectado campo paid_at/data de pagamento - considerando como pago');
-          status = 'paid';
-        }
-
-        // Normalizar status para lowercase
-        status = (status || '').toLowerCase();
-
         const adaptedResponse = {
           success: true,
           hash: statusData.id || transactionId,
           identifier: statusData.id || transactionId,
-          status: status, // created | paid | canceled | pending
-          amount: statusData.value || statusData.amount || statusData.paid_value,
+          status: statusData.status || 'pending', // created | paid | canceled
+          amount: statusData.value || statusData.amount,
           payment_method: 'pix',
-          paid_at: statusData.paid_at || statusData.payment_date || statusData.paidAt,
+          paid_at: statusData.paid_at || statusData.payment_date,
           created_at: statusData.created_at,
-          data: statusData // Incluir dados completos para debug
+          data: statusData
         };
         
-        console.log('📊 Status extraído:', status);
-        console.log('📊 Response adaptado:', JSON.stringify(adaptedResponse, null, 2));
-        
-        clearTimeout(timeout);
         return res.status(200).json(adaptedResponse);
       } catch (error) {
         console.error('Erro ao consultar transação na PushinPay:', error);
         
-        clearTimeout(timeout);
         return res.status(500).json({
           error: 'Erro ao verificar pagamento',
           message: error.message || 'Erro ao verificar pagamento',
@@ -410,13 +247,11 @@ export default async function handler(req, res) {
       }
     }
 
-    clearTimeout(timeout);
     return res.status(400).json({
       error: 'Ação inválida',
       message: 'Ação inválida'
     });
   } catch (error) {
-    clearTimeout(timeout);
     console.error('Erro na API PushinPay:', error);
     return res.status(500).json({
       error: error.message || 'Erro interno do servidor',
@@ -425,6 +260,3 @@ export default async function handler(req, res) {
     });
   }
 }
-
-
-
