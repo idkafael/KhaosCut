@@ -57,6 +57,11 @@ export default async function handler(req, res) {
       statusLower === 'confirmed' ||
       statusLower === 'pago';
     
+    // Inicializar cache de status de pagamento (em memória)
+    if (typeof global.paymentStatus === 'undefined') {
+      global.paymentStatus = {};
+    }
+
     if (isPagamentoConfirmado) {
       console.log('✅✅✅ PAGAMENTO CONFIRMADO VIA WEBHOOK!');
       console.log('📊 Detalhes:', {
@@ -66,18 +71,40 @@ export default async function handler(req, res) {
         paidAt
       });
       
-      // Aqui você pode:
-      // 1. Salvar no banco de dados (se tiver)
-      // 2. Enviar email de confirmação
-      // 3. Atualizar status em cache/memória
-      // 4. Notificar o frontend (via Server-Sent Events ou WebSocket)
+      // Salvar status confirmado no cache para o frontend consultar
+      global.paymentStatus[transactionId] = {
+        status: 'paid',
+        confirmed: true,
+        confirmedAt: new Date().toISOString(),
+        amount: amount || webhookData.value,
+        paidAt: paidAt || webhookData.paid_at || webhookData.payment_date,
+        originalStatus: status,
+        webhookData: webhookData // Manter dados completos para debug
+      };
       
-      // Por enquanto, apenas logamos
-      // O frontend continuará verificando via polling como fallback
+      console.log('💾 Status salvo no cache para consulta do frontend:', transactionId);
+      console.log('💾 Cache atualizado:', JSON.stringify(global.paymentStatus[transactionId], null, 2));
+      
     } else if (statusLower === 'canceled' || statusLower === 'cancelled') {
       console.log('❌ Pagamento cancelado via webhook:', transactionId);
+      
+      // Salvar status cancelado também
+      global.paymentStatus[transactionId] = {
+        status: 'canceled',
+        confirmed: false,
+        confirmedAt: new Date().toISOString(),
+        originalStatus: status
+      };
     } else {
       console.log('⏳ Status do pagamento (webhook):', status);
+      
+      // Salvar qualquer status recebido
+      global.paymentStatus[transactionId] = {
+        status: statusLower,
+        confirmed: false,
+        updatedAt: new Date().toISOString(),
+        originalStatus: status
+      };
     }
     
     // Sempre retornar 200 para a PushinPay

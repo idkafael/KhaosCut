@@ -333,52 +333,21 @@ const PushinPayReal = {
 
         ultimaConsulta = agora;
         try {
-          console.log('🔍 Verificando pagamento com Transaction ID:', this.estado.transactionId);
-          console.log('🔍 URL da API:', `${this.config.baseUrl}/pushinpay`);
+          console.log('🔍 Verificando status via webhook (endpoint local):', this.estado.transactionId);
           console.log('🔍 Tentativa:', tentativas);
           
-          const response = await fetch(`${this.config.baseUrl}/pushinpay`, {
-            method: 'POST',
+          // Consultar endpoint local que é atualizado pelo webhook
+          // Isso é muito mais rápido e confiável do que consultar a API PushinPay
+          const response = await fetch(`${this.config.baseUrl}/payment-status?transactionId=${encodeURIComponent(this.estado.transactionId)}`, {
+            method: 'GET',
             headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              action: 'check-payment',
-              transactionId: this.estado.transactionId,
-              possibleIds: this.estado.possibleIds
-            })
-          });
-
-          // Verificar se é 404 da rota (não encontrada) ou da API
-          if (response.status === 404) {
-            const errorText = await response.text().catch(() => '');
-            
-            // Se for 404 da API - transação ainda não existe (comportamento esperado)
-            if (errorText.includes('Transação não encontrada') || errorText.includes('transactionId')) {
-              // É 404 da API - transação ainda não existe (NORMAL, não é erro)
-              if (tentativas <= 10) {
-                console.log(`⏳ Transação ainda não encontrada na API (tentativa ${tentativas}/10 - aguardando propagação)...`);
-              } else if (tentativas <= 30) {
-                console.log(`⏳ Aguardando pagamento... (tentativa ${tentativas})`);
-              } else {
-                console.log(`⏳ Aguardando pagamento... (tentativa ${tentativas}/300)`);
-              }
-              ultimaConsulta = Date.now();
-              return;
-            } else {
-              // É 404 da rota - problema mais sério (ERRO REAL)
-              console.error('❌ ERRO CRÍTICO: Rota /api/pushinpay não encontrada no servidor!');
-              console.error('❌ Resposta recebida:', errorText);
-              this.atualizarStatus('❌ Erro: Rota não encontrada. Recarregue a página.', true);
-              this.pararVerificacao();
-              return;
+              'Accept': 'application/json'
             }
-          }
+          });
 
           if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            console.error('Erro ao verificar pagamento:', {
+            console.error('Erro ao verificar status:', {
               status: response.status,
               error: errorData.error || errorData.message || 'Erro desconhecido'
             });
@@ -387,37 +356,32 @@ const PushinPayReal = {
           }
 
           const data = await response.json();
-          const transactionData = data.data || data;
           
-          // Extrair status de múltiplos campos possíveis
-          let status = (data.status || transactionData.status || 'pending')?.toLowerCase();
+          // O endpoint /payment-status retorna: { success, source, status, confirmed, ... }
+          const status = (data.status || 'pending')?.toLowerCase();
+          const isConfirmed = data.confirmed === true;
+          const hasPaidAt = data.paid_at || data.paidAt;
+          const source = data.source || 'unknown';
           
-          // Verificar campos adicionais que indicam pagamento
-          const hasPaidAt = data.paid_at || transactionData.paid_at || data.payment_date || transactionData.payment_date;
-          const hasPaidValue = data.paid_value || transactionData.paid_value;
-          
-          // Se tiver data de pagamento, considerar como pago mesmo se status não indicar
-          if (hasPaidAt && (status === 'pending' || status === 'created')) {
-            console.log('🔍 Detectado campo paid_at - considerando como pago');
-            status = 'paid';
+          // Log apenas quando necessário (para não poluir o console)
+          if (status !== 'pending' || tentativas % 10 === 0) {
+            console.log('📊 Status consultado:', {
+              transactionId: this.estado.transactionId,
+              status,
+              confirmed: isConfirmed,
+              source,
+              tentativa: tentativas
+            });
           }
-          
-          if (!status || status === 'unknown') {
-            status = 'pending';
-          }
-          
-          // SEMPRE logar quando receber resposta (para debug)
-          console.log('📊 Resposta completa da API:', JSON.stringify(data, null, 2));
-          console.log('📊 Status do pagamento:', status);
-          console.log('📊 Tem paid_at?', hasPaidAt);
-          console.log('📊 TransactionData:', transactionData);
 
+          // Verificar se o pagamento foi confirmado
           const isPagamentoConfirmado = 
+            isConfirmed || 
             status === 'paid' || 
             status === 'approved' || 
             status === 'confirmed' ||
             status === 'pago' ||
-            hasPaidAt; // Se tiver data de pagamento, considerar pago
+            hasPaidAt
 
           if (isPagamentoConfirmado) {
             console.log('✅✅✅ PAGAMENTO CONFIRMADO! Redirecionando para agradecimento...');
@@ -428,7 +392,7 @@ const PushinPayReal = {
               detail: {
                 transactionId: this.estado.transactionId,
                 status: status,
-                value: transactionData.amount || this.estado.valorAtual / 100
+                value: data.amount || this.estado.valorAtual / 100
               }
             }));
 
