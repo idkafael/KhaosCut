@@ -55,57 +55,49 @@ export default async function handler(req, res) {
       statusLower === 'paid' || 
       statusLower === 'approved' || 
       statusLower === 'confirmed' ||
-      statusLower === 'pago';
-    
+      statusLower === 'pago' ||
+      !!paidAt; // Se tiver paid_at, considerar como pago
+
     // Inicializar cache de status de pagamento (em memória)
     if (typeof global.paymentStatus === 'undefined') {
       global.paymentStatus = {};
     }
 
+    // SEMPRE salvar qualquer status recebido do webhook
+    const statusToSave = {
+      status: isPagamentoConfirmado ? 'paid' : statusLower,
+      confirmed: isPagamentoConfirmado,
+      updatedAt: new Date().toISOString(),
+      amount: amount || webhookData.value,
+      paidAt: paidAt || webhookData.paid_at || webhookData.payment_date,
+      originalStatus: status,
+      webhookData: webhookData // Manter dados completos para debug
+    };
+
     if (isPagamentoConfirmado) {
+      statusToSave.confirmedAt = new Date().toISOString();
       console.log('✅✅✅ PAGAMENTO CONFIRMADO VIA WEBHOOK!');
       console.log('📊 Detalhes:', {
         transactionId,
         status,
+        statusLower,
         amount,
-        paidAt
+        paidAt,
+        isPagamentoConfirmado
       });
-      
-      // Salvar status confirmado no cache para o frontend consultar
-      global.paymentStatus[transactionId] = {
-        status: 'paid',
-        confirmed: true,
-        confirmedAt: new Date().toISOString(),
-        amount: amount || webhookData.value,
-        paidAt: paidAt || webhookData.paid_at || webhookData.payment_date,
-        originalStatus: status,
-        webhookData: webhookData // Manter dados completos para debug
-      };
-      
-      console.log('💾 Status salvo no cache para consulta do frontend:', transactionId);
-      console.log('💾 Cache atualizado:', JSON.stringify(global.paymentStatus[transactionId], null, 2));
-      
     } else if (statusLower === 'canceled' || statusLower === 'cancelled') {
       console.log('❌ Pagamento cancelado via webhook:', transactionId);
-      
-      // Salvar status cancelado também
-      global.paymentStatus[transactionId] = {
-        status: 'canceled',
-        confirmed: false,
-        confirmedAt: new Date().toISOString(),
-        originalStatus: status
-      };
+      statusToSave.status = 'canceled';
     } else {
-      console.log('⏳ Status do pagamento (webhook):', status);
-      
-      // Salvar qualquer status recebido
-      global.paymentStatus[transactionId] = {
-        status: statusLower,
-        confirmed: false,
-        updatedAt: new Date().toISOString(),
-        originalStatus: status
-      };
+      console.log('⏳ Status do pagamento recebido via webhook:', status, statusLower);
     }
+
+    // Salvar no cache
+    global.paymentStatus[transactionId] = statusToSave;
+    
+    console.log('💾 Status salvo no cache:', transactionId);
+    console.log('💾 Dados salvos:', JSON.stringify(statusToSave, null, 2));
+    console.log('💾 Cache completo (chaves):', Object.keys(global.paymentStatus));
     
     // Sempre retornar 200 para a PushinPay
     // Mesmo se houver erro, retornar 200 para evitar retentativas desnecessárias
