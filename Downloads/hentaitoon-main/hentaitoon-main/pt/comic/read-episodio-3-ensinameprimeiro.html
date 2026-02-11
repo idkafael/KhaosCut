@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Leitura - Ensina-Me Primeiro! - Episódio 3</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #2a2a2a;
+            color: #fff;
+            overflow-x: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Header */
+        .reader-header {
+            background: #2a2a2a;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #3a3a3a;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+        
+        .back-button {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .header-title {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .header-title h1 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            margin: 0;
+            line-height: 1.2;
+        }
+        
+        .header-title .episode {
+            font-size: 12px;
+            color: #ccc;
+            font-weight: 400;
+        }
+        
+        .header-logo {
+            height: 32px;
+            width: auto;
+            flex-shrink: 0;
+        }
+        
+        /* Área de Leitura */
+        .reader-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: #1a1a1a;
+            position: relative;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .reader-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .reader-content::-webkit-scrollbar-track {
+            background: #2a2a2a;
+        }
+        
+        .reader-content::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 3px;
+        }
+        
+        .reader-content::-webkit-scrollbar-thumb:hover {
+            background: #666;
+        }
+        
+        #manga-pages {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0;
+            gap: 0;
+        }
+        
+        .manga-page {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            background: #1a1a1a;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .manga-page img {
+            width: 100%;
+            height: auto;
+            display: block;
+            max-width: 100%;
+            object-fit: contain;
+        }
+        
+        /* Banner de Assinatura */
+        .subscription-banner {
+            width: 100%;
+            max-width: 100%;
+            background: #ffdb26;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-sizing: border-box;
+            position: relative;
+        }
+        
+        .subscription-banner-text {
+            flex: 1;
+            font-weight: 700;
+            font-size: 16px;
+            color: #000;
+            text-transform: uppercase;
+            text-align: center;
+            margin: 0;
+            padding-right: 15px;
+        }
+        
+        .subscription-banner-button {
+            background: #ffdb26;
+            border: 2px solid #000;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 700;
+            font-size: 14px;
+            color: #000;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+        
+        .subscription-banner-button:hover {
+            background: #ffed4a;
+        }
+        
+        @media (max-width: 768px) {
+            .subscription-banner {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+            
+            .subscription-banner-text {
+                padding-right: 0;
+                font-size: 14px;
+            }
+            
+            .subscription-banner-button {
+                width: 100%;
+            }
+        }
+        
+        /* Navegação */
+        .reader-nav {
+            background: #2a2a2a;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #3a3a3a;
+            flex-shrink: 0;
+        }
+        
+        .nav-button {
+            background: #3a3a3a;
+            border: none;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .nav-button:hover {
+            background: #4a4a4a;
+        }
+        
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .nav-button svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        @media (max-width: 768px) {
+            .reader-header {
+                padding: 10px 12px;
+            }
+            
+            .header-title h1 {
+                font-size: 14px;
+            }
+            
+            .header-title .episode {
+                font-size: 11px;
+            }
+            
+            .reader-nav {
+                padding: 10px 12px;
+            }
+            
+            .nav-button {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+        }
+        
+        /* Modal de Pagamento */
+        .modal-v2 {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 99999;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.7);
+        }
+        
+        .modal-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            cursor: pointer;
+        }
+        
+        .modal-v2-content {
+            position: relative;
+            background: #eaf3fb;
+            border-radius: 12px;
+            max-width: 450px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            z-index: 100000;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100001;
+            transition: background 0.2s;
+        }
+        
+        .close-modal:hover {
+            background: #fff;
+        }
+        
+        .modal-v2-body {
+            position: relative;
+        }
+        
+        .modal-v2-inner {
+            padding: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="reader-header">
+        <div class="header-left">
+            <button class="back-button" onclick="goBack()" aria-label="Voltar">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <div class="header-title">
+                <h1>Ensina-Me Primeiro!</h1>
+                <span class="episode">Episódio 3</span>
+            </div>
+        </div>
+        <a href="../../index.html" style="display: flex; align-items: center;">
+            <img src="../../images/logo-color.png" alt="Logo" class="header-logo" style="cursor: pointer;">
+        </a>
+    </header>
+    
+    <!-- Área de Leitura -->
+    <div class="reader-content" id="reader-content">
+        <div id="manga-pages"></div>
+    </div>
+    
+    <!-- Navegação -->
+    <nav class="reader-nav">
+        <button class="nav-button" onclick="goToPreviousChapter()" id="prev-episode">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Capítulo Anterior
+        </button>
+        <button class="nav-button" id="next-episode">
+            Próximo Capítulo
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+    </nav>
+    
+    <!-- Cloudinary Integration -->
+    <script src="../../js/cloudinary-config.js"></script>
+    <script src="../../js/cloudinary-mapping-loader.js"></script>
+    <script src="../../js/cloudinary-helper.js"></script>
+    <script>
+        // Páginas do Episódio 3 - usando imagens locais
+        const episodePages = [
+            "../../images/comic1/episode 3/imgi_2_9dbc9c19-7add-4cc9-aa6f-569cbd71a4d3-1742221779-33.webp",
+            "../../images/comic1/episode 3/imgi_3_d4442228-567e-474e-bd5c-295796387cb9-1742221780-19.webp",
+            "../../images/comic1/episode 3/imgi_4_8eace26f-2449-453e-a516-9749b371ada2-1742221780-86.webp",
+            "../../images/comic1/episode 3/imgi_5_83603e05-6f4b-4961-9b2f-95d8e63b6aca-1742221780-98.webp",
+            "../../images/comic1/episode 3/imgi_30_a97ad3fc-bd3e-404f-b120-d6f32c53b9cc-1742221781-37.webp",
+            "../../images/comic1/episode 3/imgi_31_55811c19-9e34-46e6-a680-b173c4b1fe28-1742221781-38.webp",
+            "../../images/comic1/episode 3/imgi_32_24aac4bc-0bf1-4a58-adb9-8430bb66960f-1742221781-11.webp",
+            "../../images/comic1/episode 3/imgi_33_a137c2be-5363-4af6-ae31-fc531fa257f3-1742221781-75.webp",
+            "../../images/comic1/episode 3/imgi_34_59ab36ab-e5b6-471c-8315-15fcbee3dc4c-1742221781-32.webp",
+            "../../images/comic1/episode 3/imgi_35_e684ed85-56e5-4abe-9616-84c5a8502f60-1742221782-71.webp",
+            "../../images/comic1/episode 3/imgi_36_7847a138-2e1f-434e-89b9-1a0fadeff206-1742221782-29.webp",
+            "../../images/comic1/episode 3/imgi_37_7a82199b-598a-4e05-bf7d-a2719b7b1ee7-1742221782-65.webp",
+            "../../images/comic1/episode 3/imgi_38_bd3b880a-7bfa-4e92-8c2a-544e89f641b9-1742221782-53.webp",
+            "../../images/comic1/episode 3/imgi_39_778b58d7-840a-4ab3-8f56-0bc1c858ee3f-1742221782-25.webp",
+            "../../images/comic1/episode 3/imgi_40_daaf3f1b-2e59-431a-8acd-0cd0ebdd18ae-1742221783-41.webp",
+            "../../images/comic1/episode 3/imgi_41_f756a1bb-6ddd-4e8b-973e-bbcb8887e4e0-1742221783-21.webp",
+            "../../images/comic1/episode 3/imgi_42_46a8f5ca-42f2-4430-b8bd-426ed97c42a3-1742221783-69.webp",
+            "../../images/comic1/episode 3/imgi_43_64431eba-58bd-4bd4-9b32-31cd897508d3-1742221783-65.webp",
+            "../../images/comic1/episode 3/imgi_44_161f7bc6-1659-4bf1-9dbb-889d80f28bbd-1742221783-99.webp",
+            "../../images/comic1/episode 3/imgi_45_fbb7d83d-63d2-4bd0-b0ea-7f512433caa7-1742221784-43.webp",
+            "../../images/comic1/episode 3/imgi_46_a8b1426c-2795-4c67-90bc-77535d6eef33-1742221784-24.webp",
+            "../../images/comic1/episode 3/imgi_47_e24cb1d6-b1e7-4dca-97e4-3ee76283d337-1742221784-53.webp",
+            "../../images/comic1/episode 3/imgi_48_34b8009d-184f-4047-b771-585644c00d90-1742221784-80.webp",
+            "../../images/comic1/episode 3/imgi_49_bb07f907-2333-40b5-89b4-5533dc6dc89c-1742221784-77.webp",
+            "../../images/comic1/episode 3/imgi_50_abaf2182-4350-4f5f-9c08-8121a520469c-1742221784-43.webp",
+            "../../images/comic1/episode 3/imgi_51_99828a51-381f-4918-b929-0b17409afeac-1742221785-17.webp",
+            "../../images/comic1/episode 3/imgi_52_cd9fcc6c-71a7-4c47-a736-25cf6a08ab25-1742221785-11.webp",
+            "../../images/comic1/episode 3/imgi_53_918a9e87-6cea-4692-b20b-53ef27df5ae1-1742221785-48.webp",
+            "../../images/comic1/episode 3/imgi_54_78aa2178-c034-4a5b-9b38-009f1c35995a-1742221785-90.webp",
+            "../../images/comic1/episode 3/imgi_55_4d2a8ee4-2705-4479-9b6d-7b5825f29a0d-1742221785-93.webp",
+            "../../images/comic1/episode 3/imgi_56_67c3b8ba-cf40-47c2-9ec8-2254c6ab50da-1742221786-69.webp",
+            "../../images/comic1/episode 3/imgi_57_f2132468-63f5-4d3a-8a9c-f9476e5bcbbb-1742221786-17.webp",
+            "../../images/comic1/episode 3/imgi_58_4fc6a737-715a-46ae-9e01-4fe3ec7ee693-1742221786-22.webp",
+            "../../images/comic1/episode 3/imgi_59_55cac34a-c4b3-473d-a352-c609cdc703be-1742221786-28.webp",
+            "../../images/comic1/episode 3/imgi_60_b9e5a1fd-332f-41de-96f0-5d449a25ca1e-1742221786-76.webp",
+            "../../images/comic1/episode 3/imgi_61_87d41df2-5f6e-4df3-8c09-48aa748270d6-1742221787-93.webp",
+            "../../images/comic1/episode 3/imgi_62_43de73fc-c9c7-4bca-b81e-e0982e427ca3-1742221787-45.webp",
+            "../../images/comic1/episode 3/imgi_63_e0c44821-7f37-474a-b3e5-e7a0b88528d0-1742221787-66.webp",
+            "../../images/comic1/episode 3/imgi_64_393ff5e4-4ed0-4617-ba4b-f19280aeedc1-1742221787-55.webp",
+            "../../images/comic1/episode 3/imgi_65_f5da0516-659c-4415-9844-919e82676d2f-1742221787-98.webp",
+            "../../images/comic1/episode 3/imgi_66_4c6965c6-8abd-4cf9-95ff-3f54a5f33d9d-1742221788-57.webp",
+            "../../images/comic1/episode 3/imgi_67_eeea42ca-8c9b-4530-a690-b6204588ef44-1742221788-51.webp",
+            "../../images/comic1/episode 3/imgi_68_cd99d9a6-5847-492e-976f-d4061218a190-1742221788-11.webp",
+            "../../images/comic1/episode 3/imgi_69_3c84730b-527b-49c7-939f-a7763224525e-1742221788-71.webp",
+            "../../images/comic1/episode 3/imgi_70_5c0bbc0c-97b5-4db7-a239-c3530ee54c78-1742221788-95.webp",
+            "../../images/comic1/episode 3/imgi_71_d3eb940b-6129-4629-8519-21a2a30f2fd7-1742221789-26.webp",
+            "../../images/comic1/episode 3/imgi_72_49acb4e2-ecbc-4266-9dcc-73abebbae389-1742221789-36.webp",
+            "../../images/comic1/episode 3/imgi_73_52a7d4a0-606f-4d6b-85ca-d6bd7d2de53a-1742221789-46.webp",
+            "../../images/comic1/episode 3/imgi_74_0b11dd79-c1be-438e-8bf5-92684781db94-1742221789-39.webp",
+            "../../images/comic1/episode 3/imgi_75_9783b7ab-e676-407e-908a-f3ba6a58c6e4-1742221790-79.webp",
+            "../../images/comic1/episode 3/imgi_76_ec256c84-60ae-4059-990c-e87ff3626c41-1742221790-63.webp",
+            "../../images/comic1/episode 3/imgi_77_dc2557cb-e492-478a-8895-e5fa5c099fe3-1742221790-45.webp",
+            "../../images/comic1/episode 3/imgi_78_ff3a9427-fe34-439f-9be3-fb026d93e4f8-1742221790-40.webp",
+            "../../images/comic1/episode 3/imgi_79_8cd4b467-f012-4c70-b0a1-3f236b48a9b4-1742221790-73.webp"
+        ];
+        
+        // Função para criar banner de assinatura
+        function createSubscriptionBanner() {
+            const bannerDiv = document.createElement('div');
+            bannerDiv.className = 'subscription-banner';
+            bannerDiv.style.maxWidth = '100%';
+            bannerDiv.style.width = '100%';
+            bannerDiv.style.padding = '20px';
+            bannerDiv.style.margin = '20px auto';
+            bannerDiv.style.boxSizing = 'border-box';
+            
+            const textDiv = document.createElement('div');
+            textDiv.className = 'subscription-banner-text';
+            textDiv.textContent = 'VOCÊ PRECISA DE UMA ASSINATURA PARA LER ALÉM DESTE PONTO';
+            textDiv.style.flex = '1';
+            textDiv.style.fontWeight = '700';
+            textDiv.style.fontSize = '16px';
+            textDiv.style.color = '#000';
+            textDiv.style.textTransform = 'uppercase';
+            textDiv.style.textAlign = 'center';
+            textDiv.style.margin = '0';
+            textDiv.style.paddingRight = '15px';
+            
+            const button = document.createElement('button');
+            button.className = 'subscription-banner-button';
+            button.textContent = 'Obtenha agora';
+            button.style.background = '#ffdb26';
+            button.style.border = '2px solid #000';
+            button.style.borderRadius = '8px';
+            button.style.padding = '10px 20px';
+            button.style.fontWeight = '700';
+            button.style.fontSize = '14px';
+            button.style.color = '#000';
+            button.style.cursor = 'pointer';
+            button.style.whiteSpace = 'nowrap';
+            button.onclick = function() {
+                if (typeof openPaymentModal === 'function') {
+                    openPaymentModal();
+                } else {
+                    window.location.href = '../../index.html';
+                }
+            };
+            
+            bannerDiv.appendChild(textDiv);
+            bannerDiv.appendChild(button);
+            
+            return bannerDiv;
+        }
+        
+        // Função para carregar as páginas do episódio
+        function loadMangaPages() {
+            const container = document.getElementById('manga-pages');
+            if (!container) {
+                console.error('Container manga-pages não encontrado');
+                return;
+            }
+            
+            // Limpa o container
+            container.innerHTML = '';
+            
+            // Carrega cada página
+            episodePages.forEach((url, index) => {
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'manga-page';
+                
+                // Marca a última página
+                const isLastPage = index === episodePages.length - 1;
+                if (isLastPage) {
+                    pageDiv.id = 'last-page';
+                    pageDiv.setAttribute('data-last-page', 'true');
+                }
+                
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = `Página ${index + 1}`;
+                img.loading = index < 3 ? 'eager' : 'lazy';
+                
+                img.onerror = function() {
+                    console.warn(`⚠️ Erro ao carregar página ${index + 1}:`, url);
+                };
+                
+                // Quando a última imagem carregar, configura o observer
+                if (isLastPage) {
+                    img.onload = function() {
+                        setupLastPageObserver();
+                    };
+                }
+                
+                pageDiv.appendChild(img);
+                container.appendChild(pageDiv);
+            });
+        }
+        
+        // Função para observar quando a última página está visível
+        function setupLastPageObserver() {
+            const lastPage = document.getElementById('last-page');
+            if (!lastPage) {
+                console.warn('⚠️ Última página não encontrada');
+                return;
+            }
+            
+            // Flag para evitar abrir múltiplas vezes
+            let modalOpened = false;
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    // Se a última página está visível e o modal ainda não foi aberto
+                    if (entry.isIntersecting && entry.intersectionRatio > 0.5 && !modalOpened) {
+                        modalOpened = true;
+                        console.log('📖 Última página do Episódio 3 detectada - abrindo modal de pagamento');
+                        
+                        // Aguarda um pouco antes de abrir o modal para dar tempo de ver a última imagem
+                        setTimeout(() => {
+                            if (typeof openPaymentModal === 'function') {
+                                openPaymentModal();
+                            } else {
+                                // Tenta abrir o modal diretamente
+                                const modal = document.getElementById('payment-modal');
+                                if (modal) {
+                                    modal.style.cssText = `
+                                        display: flex !important;
+                                        z-index: 99999 !important;
+                                        position: fixed !important;
+                                        top: 0 !important;
+                                        left: 0 !important;
+                                        width: 100% !important;
+                                        height: 100% !important;
+                                        background: rgba(0, 0, 0, 0.7) !important;
+                                        visibility: visible !important;
+                                        opacity: 1 !important;
+                                        pointer-events: auto !important;
+                                    `;
+                                }
+                            }
+                        }, 1000); // 1 segundo após ver a última imagem
+                    }
+                });
+            }, {
+                threshold: 0.5, // Quando 50% da última página estiver visível
+                rootMargin: '0px'
+            });
+            
+            observer.observe(lastPage);
+        }
+        
+        // Navegação
+        function goBack() {
+            // Força scroll para o topo antes de navegar
+            window.scrollTo(0, 0);
+            window.location.href = 'comic-5.html';
+        }
+
+        function goToPreviousChapter() {
+    window.scrollTo(0, 0);
+    window.location.href = 'read-episodio-2-ensinameprimeiro.html';
+}
+
+        function goToNextChapter(e) {
+            // Previne qualquer navegação
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+            }
+            
+            // Episódio 4 requer assinatura - abre modal de pagamento
+            console.log('🔒 Tentando acessar Episódio 4 - abrindo modal de pagamento');
+            
+            // Abre o modal diretamente
+            const modal = document.getElementById('payment-modal');
+            if (modal) {
+                console.log('✅ Abrindo modal de pagamento');
+                modal.style.cssText = `
+                    display: flex !important;
+                    z-index: 99999 !important;
+                    position: fixed !important;
+                    top: 0 !important;
+                    left: 0 !important;
+                    width: 100% !important;
+                    height: 100% !important;
+                    background: rgba(0, 0, 0, 0.7) !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                    pointer-events: auto !important;
+                `;
+                
+                // Garantir que o conteúdo do modal também esteja visível
+                const modalContent = modal.querySelector('.modal-v2-content');
+                if (modalContent) {
+                    modalContent.style.cssText = `
+                        background: #eaf3fb !important;
+                        z-index: 100000 !important;
+                        position: relative !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        display: block !important;
+                    `;
+                }
+            } else {
+                console.error('❌ Modal de pagamento não encontrado');
+            }
+            
+            return false;
+        }
+        
+        
+        
+        // Inicialização
+        function initReader() {
+            const prevBtn = document.getElementById('prev-episode');
+            const nextBtn = document.getElementById('next-episode');
+            
+            if (prevBtn) prevBtn.disabled = false;
+            
+            // Adiciona event listener para o botão "Próximo Capítulo" (Episódio 4)
+            if (nextBtn) {
+                // Remove qualquer atributo onclick ou href que possa causar navegação
+                nextBtn.removeAttribute('onclick');
+                nextBtn.removeAttribute('href');
+                nextBtn.type = 'button';
+                
+                // Função para abrir o modal
+                function handleNextClick(e) {
+                    if (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                    }
+                    console.log('🔒 Botão próximo clicado - bloqueando navegação');
+                    goToNextChapter(e);
+                    return false;
+                }
+                
+                // Remove qualquer listener anterior clonando o botão
+                const newNextBtn = nextBtn.cloneNode(true);
+                nextBtn.parentNode.replaceChild(newNextBtn, nextBtn);
+                
+                // Adiciona múltiplos listeners para garantir
+                newNextBtn.onclick = handleNextClick;
+                newNextBtn.addEventListener('click', handleNextClick, true);
+                newNextBtn.addEventListener('click', handleNextClick, false);
+            }
+            
+            loadMangaPages();
+        }
+        
+        // Carrega as páginas quando o DOM estiver pronto
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initReader);
+        } else {
+            initReader();
+        }
+        
+        // Também tenta bloquear após um pequeno delay para garantir
+        setTimeout(function() {
+            const nextBtn = document.getElementById('next-episode');
+            if (nextBtn) {
+                function handleNextClick(e) {
+                    if (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                    }
+                    console.log('🔒 Botão próximo clicado (timeout) - bloqueando navegação');
+                    goToNextChapter(e);
+                    return false;
+                }
+                nextBtn.onclick = handleNextClick;
+                nextBtn.addEventListener('click', handleNextClick, true);
+            }
+        }, 500);
+        
+        // Suporte para gestos de swipe (mobile)
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.getElementById('reader-content').addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        }, false);
+        
+        document.getElementById('reader-content').addEventListener('touchend', function(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, false);
+        
+        function handleSwipe() {
+            // Swipe horizontal bloqueado - apenas scroll vertical funciona
+            // Navegação entre capítulos só pelos botões
+            return;
+        }
+        
+        // Configuração PushinPay
+        const PushinPayConfig = {
+            apiBaseUrl: 'https://api.pushinpay.com.br/api',
+            apiToken: '60917|m4kT6SITcItBgEIAnYZ0Q6NBnbxpRlIJWZeBaQ3L46ffe607',
+            valor: 9.90, // Valor em reais
+            plano: 'Acesso Premium'
+        };
+
+        let paymentCheckInterval = null;
+        let currentTransactionId = null;
+
+        // Função para gerar QR Code visual a partir do código PIX
+        function generateQRCodeImage(pixCode) {
+            console.log('🖼️ Gerando QR Code a partir do código PIX...', pixCode ? 'Código presente' : 'Código ausente');
+            
+            if (!pixCode) {
+                console.warn('⚠️ Código PIX não fornecido');
+                return;
+            }
+            
+            const container = document.getElementById('qrcode-container');
+            if (!container) {
+                console.error('❌ Container qrcode-container não encontrado!');
+                return;
+            }
+            
+            console.log('✅ Container encontrado, gerando QR Code...');
+            container.innerHTML = '';
+            
+            // Usar API pública para gerar QR Code
+            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(pixCode)}`;
+            console.log('🔗 URL do QR Code:', qrCodeUrl.substring(0, 100) + '...');
+            
+            const img = document.createElement('img');
+            img.src = qrCodeUrl;
+            img.alt = 'QR Code Pix';
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            img.style.display = 'block';
+            img.style.margin = '0 auto';
+            img.style.borderRadius = '8px';
+            
+            img.onload = () => {
+                console.log('✅ QR Code carregado com sucesso!');
+            };
+            
+            img.onerror = (e) => {
+                console.error('❌ Erro ao carregar QR Code:', e);
+            };
+            
+            container.appendChild(img);
+            console.log('✅ QR Code adicionado ao container');
+        }
+
+        // Função para exibir QR Code base64
+        function displayQRCodeBase64(qrCodeBase64) {
+            console.log('🖼️ Exibindo QR Code base64...', qrCodeBase64 ? 'Base64 presente' : 'Base64 ausente');
+            
+            const container = document.getElementById('qrcode-container');
+            if (!container) {
+                console.error('❌ Container qrcode-container não encontrado!');
+                return;
+            }
+            
+            if (!qrCodeBase64) {
+                console.warn('⚠️ QR Code base64 não fornecido');
+                return;
+            }
+            
+            console.log('✅ Container encontrado, exibindo QR Code base64...');
+            container.innerHTML = '';
+            
+            const img = document.createElement('img');
+            let imageSrc = qrCodeBase64;
+            if (!qrCodeBase64.startsWith('data:')) {
+                imageSrc = `data:image/png;base64,${qrCodeBase64}`;
+            }
+            img.src = imageSrc;
+            img.alt = 'QR Code PIX';
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            img.style.display = 'block';
+            img.style.margin = '0 auto';
+            img.style.borderRadius = '8px';
+            
+            img.onload = () => {
+                console.log('✅ QR Code base64 carregado com sucesso!');
+            };
+            
+            img.onerror = (e) => {
+                console.error('❌ Erro ao carregar QR Code base64:', e);
+            };
+            
+            container.appendChild(img);
+            console.log('✅ QR Code base64 adicionado ao container');
+        }
+
+        // Função para criar pagamento PIX via PushinPay
+        async function createPixPayment() {
+            try {
+                const valorEmCentavos = Math.round(PushinPayConfig.valor * 100);
+                
+                console.log('🚀 Criando pagamento PIX via PushinPay...', {
+                    valor: PushinPayConfig.valor,
+                    valorCentavos: valorEmCentavos
+                });
+                
+                const response = await fetch(`${PushinPayConfig.apiBaseUrl}/pix/cashIn`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${PushinPayConfig.apiToken}`,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        value: valorEmCentavos
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('❌ Erro na API PushinPay:', response.status, errorText);
+                    throw new Error(`Erro ao criar pagamento: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('✅ Pagamento criado com sucesso:', data);
+
+                // Extrair dados da resposta
+                const pixCode = data.qr_code;
+                const qrCodeBase64 = data.qr_code_base64;
+                const transactionId = data.id;
+                const status = data.status;
+
+                console.log('📦 Dados extraídos da resposta:', {
+                    temPixCode: !!pixCode,
+                    temQrCodeBase64: !!qrCodeBase64,
+                    transactionId: transactionId,
+                    status: status,
+                    pixCodePreview: pixCode ? pixCode.substring(0, 50) + '...' : 'não disponível'
+                });
+
+                // Atualizar valor no modal
+                const amountEl = document.getElementById('payment-amount');
+                if (amountEl) {
+                    amountEl.textContent = `R$ ${PushinPayConfig.valor.toFixed(2).replace('.', ',')}`;
+                    console.log('✅ Valor atualizado no modal');
+                } else {
+                    console.warn('⚠️ Elemento payment-amount não encontrado');
+                }
+
+                // Exibir QR Code
+                if (qrCodeBase64) {
+                    console.log('🖼️ Usando QR Code base64 da API');
+                    displayQRCodeBase64(qrCodeBase64);
+                } else if (pixCode) {
+                    console.log('🖼️ Gerando QR Code a partir do código PIX');
+                    generateQRCodeImage(pixCode);
+                } else {
+                    console.error('❌ Nenhum QR Code ou código PIX encontrado na resposta!');
+                    console.log('📋 Resposta completa:', JSON.stringify(data, null, 2));
+                }
+
+                // Exibir código PIX
+                const pixCodeInput = document.getElementById('pix-code');
+                if (pixCodeInput) {
+                    if (pixCode) {
+                        pixCodeInput.value = pixCode;
+                        console.log('✅ Código PIX exibido no input');
+                    } else {
+                        console.warn('⚠️ Código PIX não disponível para exibir');
+                    }
+                } else {
+                    console.warn('⚠️ Elemento pix-code não encontrado');
+                }
+
+                // Salvar transaction ID e iniciar verificação
+                if (transactionId) {
+                    currentTransactionId = transactionId;
+                    startPaymentCheck(transactionId);
+                }
+                
+                // Mostrar conteúdo
+                const loading = document.getElementById('payment-loading');
+                const content = document.getElementById('payment-content');
+                const error = document.getElementById('payment-error');
+                
+                console.log('🔍 Debug - Elementos do modal:', {
+                    loading: loading ? 'encontrado' : 'NÃO encontrado',
+                    content: content ? 'encontrado' : 'NÃO encontrado',
+                    error: error ? 'encontrado' : 'NÃO encontrado',
+                    modal: document.getElementById('payment-modal') ? 'encontrado' : 'NÃO encontrado'
+                });
+                
+                if (loading) {
+                    loading.style.display = 'none';
+                    console.log('✅ Loading escondido');
+                }
+                if (content) {
+                    content.style.display = 'block';
+                    console.log('✅ Content mostrado');
+                }
+                if (error) {
+                    error.style.display = 'none';
+                }
+
+                return data;
+            } catch (error) {
+                console.error('❌ Erro ao criar pagamento:', error);
+                throw error;
+            }
+        }
+
+        // Função para verificar status do pagamento
+        async function checkPaymentStatus(transactionId) {
+            try {
+                const response = await fetch(`${PushinPayConfig.apiBaseUrl}/transactions/${transactionId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${PushinPayConfig.apiToken}`,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        console.log('⏳ Transação ainda não encontrada...');
+                        return null;
+                    }
+                    throw new Error(`Erro ao verificar pagamento: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('❌ Erro ao verificar status:', error);
+                return null;
+            }
+        }
+
+        // Função para iniciar verificação automática
+        function startPaymentCheck(transactionId) {
+            if (paymentCheckInterval) {
+                clearInterval(paymentCheckInterval);
+            }
+
+            let tentativas = 0;
+            const maxTentativas = 300; // 15 minutos (300 * 3s)
+
+            const verificarPagamento = async () => {
+                tentativas++;
+
+                if (tentativas > maxTentativas) {
+                    console.warn('⚠️ Limite de tentativas atingido');
+                    stopPaymentCheck();
+                    updatePaymentStatus('⏱️ Tempo de verificação expirado. Gere um novo QR Code.', true);
+                    return;
+                }
+
+                const statusData = await checkPaymentStatus(transactionId);
+                
+                if (!statusData) {
+                    return; // Continuar verificando
+                }
+
+                const status = statusData.status?.toLowerCase() || 'pending';
+                console.log('📊 Status do pagamento:', status);
+
+                if (status === 'paid' || status === 'approved' || status === 'confirmed') {
+                    console.log('✅✅✅ PAGAMENTO CONFIRMADO!');
+                    stopPaymentCheck();
+                    updatePaymentStatus('✅ Pagamento confirmado! Liberando acesso...', false, true);
+                    
+                    // Salvar no localStorage
+                    try {
+                        const paymentData = {
+                            transactionId: transactionId,
+                            status: status,
+                            value: PushinPayConfig.valor,
+                            timestamp: new Date().toISOString(),
+                            plano: PushinPayConfig.plano
+                        };
+                        localStorage.setItem('pagamento_confirmado', JSON.stringify(paymentData));
+                        console.log('✅ Pagamento salvo no localStorage');
+                    } catch (error) {
+                        console.warn('⚠️ Erro ao salvar no localStorage:', error);
+                    }
+
+                    // Redirecionar após 2 segundos
+                    setTimeout(() => {
+                        alert('Pagamento confirmado! Acesso liberado.');
+                    }, 2000);
+                } else if (status === 'canceled' || status === 'cancelled') {
+                    console.log('❌ Pagamento cancelado');
+                    stopPaymentCheck();
+                    updatePaymentStatus('❌ Pagamento cancelado. Gere um novo QR Code.', true);
+                } else {
+                    updatePaymentStatus('Aguardando pagamento...', false);
+                }
+            };
+
+            // Primeira verificação imediatamente
+            verificarPagamento();
+            
+            // Depois verificar a cada 3 segundos
+            paymentCheckInterval = setInterval(verificarPagamento, 3000);
+            console.log('🔄 Verificação automática iniciada');
+        }
+        
+        // Função para parar verificação
+        function stopPaymentCheck() {
+            if (paymentCheckInterval) {
+                clearInterval(paymentCheckInterval);
+                paymentCheckInterval = null;
+                console.log('⏸️ Verificação parada');
+            }
+        }
+
+        // Função para atualizar status do pagamento
+        function updatePaymentStatus(message, isError = false, isSuccess = false) {
+            const statusDiv = document.getElementById('payment-status');
+            if (!statusDiv) return;
+
+            if (isSuccess) {
+                statusDiv.style.background = '#4caf50';
+                statusDiv.style.color = '#fff';
+                statusDiv.innerHTML = `<p style="margin: 0; font-weight: 600;">${message}</p>`;
+            } else if (isError) {
+                statusDiv.style.background = '#dc143c';
+                statusDiv.style.color = '#fff';
+                statusDiv.innerHTML = `<p style="margin: 0; font-weight: 600;">${message}</p>`;
+            } else {
+                statusDiv.style.background = '#f5f5f5';
+                statusDiv.style.color = '#666';
+                statusDiv.innerHTML = `<p style="margin: 0;">${message}</p>`;
+            }
+        }
+
+        // Função para abrir modal de pagamento
+        async function openPaymentModal() {
+            console.log('🚀 Abrindo modal de pagamento...');
+            const modal = document.getElementById('payment-modal');
+            if (!modal) {
+                console.error('❌ Modal não encontrado!');
+                alert('Erro: Modal de pagamento não encontrado.');
+                return;
+            }
+            
+            console.log('✅ Modal encontrado, abrindo...');
+            
+            // Abrir modal com z-index alto e forçar visibilidade
+            modal.style.cssText = `
+                display: flex !important;
+                z-index: 99999 !important;
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                background: rgba(0, 0, 0, 0.7) !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                pointer-events: auto !important;
+            `;
+            
+            // Garantir que o conteúdo do modal também esteja visível
+            const modalContent = modal.querySelector('.modal-v2-content');
+            if (modalContent) {
+                modalContent.style.cssText = `
+                    background: #eaf3fb !important;
+                    z-index: 100000 !important;
+                    position: relative !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                    display: block !important;
+                `;
+            }
+            
+            // Limpar QR Code anterior
+            const qrContainer = document.getElementById('qrcode-container');
+            if (qrContainer) {
+                qrContainer.innerHTML = '';
+            }
+            
+            // Limpar código PIX anterior
+            const pixInput = document.getElementById('pix-code');
+            if (pixInput) {
+                pixInput.value = '';
+            }
+            
+            // Mostrar loading inicialmente
+            const loading = document.getElementById('payment-loading');
+            const content = document.getElementById('payment-content');
+            const error = document.getElementById('payment-error');
+            
+            if (loading) {
+                loading.style.display = 'block';
+            }
+            if (content) {
+                content.style.display = 'none';
+            }
+            if (error) {
+                error.style.display = 'none';
+            }
+
+            // Limpar verificação anterior
+            stopPaymentCheck();
+            currentTransactionId = null;
+
+            // Atualizar status
+            updatePaymentStatus('Gerando QR Code...', false);
+
+            try {
+                console.log('🔄 Iniciando criação de pagamento...');
+                // Criar pagamento PIX
+                await createPixPayment();
+                console.log('✅ Pagamento criado, conteúdo deve estar visível agora');
+            } catch (paymentError) {
+                console.error('❌ Erro ao processar pagamento:', paymentError);
+                if (loading) loading.style.display = 'none';
+                if (error) {
+                    error.style.display = 'block';
+                    const errorText = error.querySelector('p');
+                    if (errorText) {
+                        errorText.textContent = 'Erro ao gerar pagamento. Por favor, tente novamente.';
+                    }
+                }
+            }
+        }
+        
+        function closePaymentModal() {
+            const modal = document.getElementById('payment-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            stopPaymentCheck();
+        }
+        
+        function copyPixCode() {
+            const pixCodeInput = document.getElementById('pix-code');
+            if (pixCodeInput && pixCodeInput.value) {
+                pixCodeInput.select();
+                document.execCommand('copy');
+                
+                const button = event.target;
+                if (button) {
+                    const originalText = button.textContent;
+                    button.textContent = 'Copiado!';
+                    button.style.background = '#4caf50';
+                    button.style.color = '#fff';
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.style.background = '#ffdb26';
+                        button.style.color = '#000';
+                    }, 2000);
+                }
+            }
+        }
+        
+        function retryPayment() {
+            openPaymentModal();
+        }
+        
+        // Fechar modal ao clicar no fundo
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('payment-modal');
+            if (e.target === modal || e.target.classList.contains('modal-bg') || e.target.classList.contains('modal-exit')) {
+                closePaymentModal();
+            }
+        });
+    </script>
+    
+    <!-- Modal de Pagamento -->
+    <div class="modal-v2 modal-payment" id="payment-modal" style="display: none;">
+        <div class="modal-bg modal-exit" onclick="closePaymentModal()"></div>
+        <div class="modal-v2-content" style="max-width: 450px;">
+            <span class="close close-modal modal-exit" onclick="closePaymentModal()">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7.00072 5.58672L11.9507 0.636719L13.3647 2.05072L8.41472 7.00072L13.3647 11.9507L11.9507 13.3647L7.00072 8.41472L2.05072 13.3647L0.636719 11.9507L5.58672 7.00072L0.636719 2.05072L2.05072 0.636719L7.00072 5.58672Z" fill="black"></path>
+                </svg>
+            </span>
+            <div class="modal-v2-body">
+                <div style="text-align: center; position: relative; border-radius: 12px 12px 0 0; overflow: hidden; width: 100%; margin: 0; padding: 0;">
+                    <img src="../../images/ask-modal-bg.bf80a828.webp" alt="Leia de forma vitalícia" style="width: 100%; max-width: none; height: auto; display: block; object-fit: cover; margin: 0; padding: 0; border-radius: 12px 12px 0 0; min-height: 200px; object-position: center;">
+                    <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); text-align: center; width: 100%; padding: 0 15px;">
+                        <h2 class="modal-header-text" style="font-family: Impact, 'Arial Black', sans-serif; font-size: 24px; font-weight: 700; color: #000; margin: 0; text-transform: uppercase; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(255,255,255,0.8); line-height: 1.2;">LEIA DE FORMA —</h2>
+                        <h2 class="modal-header-text" style="font-family: Impact, 'Arial Black', sans-serif; font-size: 24px; font-weight: 700; color: #000; margin: 5px 0 0 0; text-transform: uppercase; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(255,255,255,0.8); line-height: 1.2;">VITALÍCIA!</h2>
+                    </div>
+                </div>
+                <div class="modal-v2-inner">
+                    <div id="payment-loading" style="text-align: center; padding: 40px;">
+                        <div style="display: inline-block; width: 50px; height: 50px; border: 4px solid #f3f3f3; border-top: 4px solid #ffdb26; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                        <p style="margin-top: 20px; color: #666;">Gerando QR Code...</p>
+                    </div>
+                    <div id="payment-content" style="display: none;">
+                        <div style="text-align: center; margin-bottom: 15px;">
+                            <div id="qrcode-container" style="display: inline-block; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 100%; box-sizing: border-box;"></div>
+                        </div>
+                        <div style="text-align: center; margin-bottom: 15px;">
+                            <p style="margin: 0 0 5px 0; font-weight: 600; color: #000; font-size: 14px;">Valor:</p>
+                            <p id="payment-amount" style="font-size: 28px; font-weight: 700; color: #000; margin: 0;">R$ 0,00</p>
+                        </div>
+                        <div style="position: relative; text-align: center; margin: 20px 0;">
+                            <div style="position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #ddd;"></div>
+                            <span style="position: relative; background: transparent; padding: 0 15px; color: #666; font-size: 14px;">ou</span>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #000; font-size: 14px;">Código Pix (Copiar e Colar):</label>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <input type="text" id="pix-code" readonly style="flex: 1; min-width: 200px; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; font-family: monospace; background: #fff; box-sizing: border-box;">
+                                <button onclick="copyPixCode()" style="padding: 12px 20px; background: #ffdb26; color: #000; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; white-space: nowrap; flex-shrink: 0;">Copiar</button>
+                            </div>
+                        </div>
+                        <div id="payment-status" style="text-align: center; padding: 15px; border-radius: 8px; margin-bottom: 15px; background: #f5f5f5;">
+                            <p style="margin: 0; color: #666; font-size: 14px;">Aguardando pagamento...</p>
+                        </div>
+                        <button class="btn btn-yellow btn-yellow--big w-100" onclick="closePaymentModal()" style="background: #ffdb26; color: #000; font-weight: 700; padding: 14px 24px; border-radius: 8px; border: none; cursor: pointer; width: 100%; font-size: 16px; box-sizing: border-box; margin-bottom: 12px;">
+                            Continuar
+                        </button>
+                        <button onclick="window.location.href='../../index.html'" style="background: transparent; color: #666; font-weight: 600; padding: 12px 24px; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; width: 100%; font-size: 14px; box-sizing: border-box; transition: all 0.2s;">
+                            Ver todas as histórias
+                        </button>
+                    </div>
+                    <div id="payment-error" style="display: none; text-align: center; padding: 40px;">
+                        <p style="color: #dc143c; font-weight: 600; margin-bottom: 20px;">Erro ao gerar pagamento</p>
+                        <button class="btn btn-yellow btn-yellow--big" onclick="retryPayment()" style="background: #ffdb26; color: #000; font-weight: 700; padding: 12px 24px; border-radius: 8px; border: none; cursor: pointer;">
+                            Tentar Novamente
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
