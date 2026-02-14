@@ -16,10 +16,10 @@ async function getFFmpeg(): Promise<FFmpeg> {
   // Carregar FFmpeg.wasm
   if (!isFFmpegLoaded) {
     // Criar promise com timeout
-    const loadWithTimeout = (loadPromise: Promise<void>, timeout: number = 30000) => {
+    const loadWithTimeout = <T>(loadPromise: Promise<T>, timeout: number = 30000): Promise<T> => {
       return Promise.race([
         loadPromise,
-        new Promise<void>((_, reject) => 
+        new Promise<T>((_, reject) => 
           setTimeout(() => reject(new Error('Timeout ao carregar FFmpeg')), timeout)
         )
       ]);
