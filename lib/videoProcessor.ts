@@ -147,8 +147,9 @@ export async function processVideo(
     await ffmpeg.deleteFile(outputFileName);
 
     // Converter FileData (Uint8Array) para Blob
-    // readFile retorna Uint8Array, que precisa ser convertido corretamente
-    return new Blob([data as Uint8Array], { type: file.type || 'video/mp4' });
+    // readFile retorna Uint8Array, converter para ArrayBuffer para compatibilidade
+    const arrayBuffer = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+    return new Blob([arrayBuffer], { type: file.type || 'video/mp4' });
   } catch (error) {
     console.error('Erro ao processar vídeo:', error);
     throw new Error('Erro ao processar vídeo com FFmpeg');
