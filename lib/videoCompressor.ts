@@ -178,10 +178,16 @@ export async function compressVideo(
     await ffmpeg.deleteFile(inputFileName);
     await ffmpeg.deleteFile(outputFileName);
 
-    // Converter FileData (Uint8Array) para Blob
-    // readFile retorna Uint8Array, converter para ArrayBuffer para compatibilidade
-    const arrayBuffer = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
-    const compressedBlob = new Blob([arrayBuffer], { type: 'video/mp4' });
+    // Converter FileData para Blob
+    // readFile retorna Uint8Array ou string, verificar tipo e converter
+    let compressedBlob: Blob;
+    if (data instanceof Uint8Array) {
+      const arrayBuffer = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+      compressedBlob = new Blob([arrayBuffer], { type: 'video/mp4' });
+    } else {
+      // Se for string, converter para Blob diretamente
+      compressedBlob = new Blob([data], { type: 'video/mp4' });
+    }
     const compressedSize = compressedBlob.size;
     const reduction = ((originalSize - compressedSize) / originalSize * 100).toFixed(1);
     console.log(`Compressão concluída: ${file.name} - ${reduction}% menor (${(originalSize / 1024 / 1024).toFixed(2)} MB → ${(compressedSize / 1024 / 1024).toFixed(2)} MB)`);
