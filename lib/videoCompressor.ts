@@ -182,8 +182,9 @@ export async function compressVideo(
     // readFile retorna Uint8Array ou string, verificar tipo e converter
     let compressedBlob: Blob;
     if (data instanceof Uint8Array) {
-      // Uint8Array é diretamente compatível com Blob
-      compressedBlob = new Blob([data], { type: 'video/mp4' });
+      // Criar novo Uint8Array para garantir compatibilidade com Blob
+      const uint8Array = new Uint8Array(data);
+      compressedBlob = new Blob([uint8Array], { type: 'video/mp4' });
     } else {
       // Se for string, converter para Blob diretamente
       compressedBlob = new Blob([data], { type: 'video/mp4' });
