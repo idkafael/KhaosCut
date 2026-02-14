@@ -76,6 +76,7 @@ backup/
 
 # Dados de vendas
 data/keys.json
+data/used_keys.json
 vendas.json
 
 # Manter diretório data/ mas não commitar keys.json
