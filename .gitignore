@@ -3,6 +3,9 @@ node_modules/
 /.pnp
 .pnp.js
 
+# Downloads (arquivos de outros projetos)
+Downloads/
+
 # Testing
 /coverage
 

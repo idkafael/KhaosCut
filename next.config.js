@@ -34,6 +34,8 @@ const nextConfig = {
     // Avisa mas não falha o build em produção
     ignoreBuildErrors: false,
   },
+  // Excluir pastas do build
+  pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
 }
 
 module.exports = nextConfig
