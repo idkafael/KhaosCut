@@ -8,6 +8,12 @@ const nextConfig = {
       '@': path.resolve(__dirname),
     };
     
+    // Excluir pasta Downloads do build
+    config.watchOptions = {
+      ...config.watchOptions,
+      ignored: ['**/node_modules/**', '**/Downloads/**'],
+    };
+    
     // Configuração para FFmpeg.wasm
     if (!isServer) {
       config.resolve.fallback = {
