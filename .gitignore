@@ -72,8 +72,12 @@ database.json
 backup/
 
 # Dados de vendas
-data/
+data/keys.json
 vendas.json
+
+# Manter diretório data/ mas não commitar keys.json
+!data/
+!data/.gitkeep
 
 
 .vercel

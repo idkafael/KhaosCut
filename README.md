@@ -1,145 +1,103 @@
-# 🔒 Privacy - Sistema de Pagamento PIX com Next.js
+# Cortador de Mídia em Massa
 
-Sistema completo de pagamento PIX integrado com PushinPay para conteúdo premium, desenvolvido com Next.js para máxima segurança.
+SaaS web para cortar imagens e vídeos em massa a partir de pixels. Processamento 100% client-side com design moderno escuro e aspecto roxo.
 
-## 🚀 Tecnologias
+## Funcionalidades
 
-- **Next.js 14** - Framework React com SSR
-- **React 18** - Biblioteca UI
-- **Tailwind CSS** - Estilização
-- **PushinPay API** - Pagamentos PIX
-- **Vercel** - Hospedagem
+- ✅ Autenticação via key vitalícia
+- ✅ Upload de pasta inteira
+- ✅ Corte de imagens (JPG, PNG, WebP)
+- ✅ Corte de vídeos (MP4, MOV, AVI)
+- ✅ Compressão de imagens e vídeos
+- ✅ Processamento em lote com progresso
+- ✅ Download em ZIP
+- ✅ Design moderno escuro com tema roxo
 
-## 📋 Instalação
+## Tecnologias
 
-### 1. Clone o repositório
+- Next.js 14+ (App Router)
+- TypeScript
+- Tailwind CSS
+- Canvas API (processamento de imagens)
+- FFmpeg.wasm (processamento de vídeos)
+- JSZip (geração de ZIP)
 
-```bash
-git clone https://github.com/idkafael/marmari.git
-cd marmari
-```
-
-### 2. Instale as dependências
+## Instalação
 
 ```bash
 npm install
 ```
 
-### 3. Configure as variáveis de ambiente
-
-📋 **Arquivo de exemplo**: Use o arquivo `env.example` como referência. Copie para `.env.local` e preencha os valores.
-
-**📋 Use o arquivo `env.example` como referência!**
-
-1. **Copie `env.example` para `.env.local`**
-2. **Preencha os valores obrigatórios**:
-   - `PUSHINPAY_TOKEN` - Token da API PushinPay
-   - `PUSHINPAY_API_URL` - URL da API (padrão: `https://api.pushinpay.com.br`)
-
-**Veja o arquivo `env.example` para todas as variáveis disponíveis.**
-
-**⚠️ IMPORTANTE:** Nunca faça commit do arquivo `.env.local`!
-
-### 4. Execute localmente
+## Desenvolvimento
 
 ```bash
 npm run dev
 ```
 
-Acesse: http://localhost:3000
+Acesse [http://localhost:3000](http://localhost:3000)
 
-## 🚀 Deploy na Vercel
+## Configuração de Keys
 
-### Deploy Rápido
+### Keys Disponíveis
 
-1. **Conecte ao GitHub:**
-   - Vá em [vercel.com](https://vercel.com)
-   - Clique em "Add New Project"
-   - Selecione o repositório
+As keys válidas estão em `data/keys.json`. Atualmente disponíveis:
 
-2. **Configure Environment Variables:**
-   - Vá em **Settings** → **Environment Variables**
-   - Adicione todas as variáveis do `.env.local`
-   - `PUSHINPAY_TOKEN`
-   - `PUSHINPAY_API_URL` (opcional)
+- `demo-key-12345`
+- `test-key-67890`
 
-3. **Deploy:**
-   - A Vercel detecta Next.js automaticamente
-   - Clique em "Deploy"
-   - Aguarde o build (~2-3 minutos)
-   - Teste o site funcionando
+### Sistema de Keys Vitalícias
 
-## 🔐 Segurança
+- **Keys são vitalícias**: Uma vez validadas, permanecem válidas para sempre
+- **Em Desenvolvimento**: Keys podem ser reutilizadas para testes
+- **Em Produção**: Keys são **deletadas automaticamente após uso** (uma key = um usuário)
 
-- ✅ Tokens protegidos no servidor via API Routes
-- ✅ Nenhum token exposto no cliente (HTML/JS)
-- ✅ Variáveis de ambiente para todas as credenciais
-- ✅ `.env.local` protegido no `.gitignore`
+### Adicionar Novas Keys
 
-## 📁 Estrutura do Projeto
+Para adicionar novas keys, edite o arquivo `data/keys.json` ou use o script:
 
-```
-/
-├── .env.local              # Variáveis de ambiente (não vai para git)
-├── .gitignore              # Protege arquivos sensíveis
-├── next.config.js          # Configuração Next.js
-├── package.json            # Dependências
-├── pages/
-│   ├── _app.js            # Configuração Next.js
-│   ├── index.js           # Página principal (React)
-│   ├── agradecimento.js   # Pós-pagamento (React)
-│   └── api/
-│       ├── pushinpay.js   # API protegida PushinPay
-│       └── telegram.js    # API protegida Telegram
-├── components/
-│   ├── MediaGrid.js       # Grid de mídias
-│   ├── ModalPagamento.js  # Modal de pagamento PIX
-│   └── LateralVideos.js   # Vídeos laterais
-├── public/
-│   ├── images/            # Imagens e vídeos
-│   ├── css/               # Estilos
-│   └── js/
-│       ├── pushinpay-real.js # JavaScript PushinPay
-│       ├── database.js     # Gerenciamento de banco
-│       └── lead-tracking.js # Rastreamento de leads
-└── README.md              # Este arquivo
+```bash
+node scripts/add-key.js sua-nova-key-aqui
 ```
 
-## 🎨 Funcionalidades
+**Importante**: 
+- Não commite o arquivo `data/keys.json` com keys reais em produção
+- Use variáveis de ambiente ou um banco de dados para keys em produção
+- Em produção, cada key será usada apenas uma vez
 
-- ✅ Sistema de pagamento PIX completo
-- ✅ QR Code gerado automaticamente
-- ✅ Verificação de pagamento em tempo real
-- ✅ Notificações via Telegram
-- ✅ Rastreamento Facebook Pixel
-- ✅ Interface responsiva (mobile + desktop)
-- ✅ Segurança máxima (tokens no servidor)
-- ✅ React components reutilizáveis
+## Variáveis de Ambiente
 
-## 📝 Licença
+Crie um arquivo `.env.local`:
 
-Este projeto é privado e proprietário.
+```env
+NODE_ENV=production  # ou development
+```
 
----
+- `NODE_ENV=production`: Keys são deletadas após uso
+- `NODE_ENV=development`: Keys podem ser reutilizadas
 
-## 📝 Histórico de Modificações
+## Build
 
-### Última Atualização: 2025
+```bash
+npm run build
+npm start
+```
 
-#### ✅ Migração para PushinPay
-- **Gateway de Pagamento**: PushinPay
-- **API Route**: `pages/api/pushinpay.js`
-- **Frontend**: `public/js/pushinpay-real.js`
-- **URL Base da API**: `https://api.pushinpay.com.br`
+## Estrutura
 
-#### 🔄 Fluxo de Pagamento
-1. Lead clica em pagar no `index.js`
-2. Modal abre e cria PIX via PushinPay
-3. QR Code é gerado e exibido
-4. Verificação automática a cada 10 segundos
-5. Quando pagamento confirmado, redireciona para `/agradecimento`
-6. Página de agradecimento exibe detalhes e acesso ao conteúdo
+- `app/` - Páginas e rotas da API
+- `components/` - Componentes React
+- `hooks/` - Custom hooks
+- `lib/` - Bibliotecas de processamento
+- `data/` - Dados (keys)
 
----
+## Funcionalidades de Compressão
 
-**Desenvolvido com ❤️ para facilitar pagamentos PIX seguros**
+### Imagens
+- Qualidade ajustável (10% a 100%)
+- Conversão automática para JPEG quando compressão ativada
+- Controle via slider
+
+### Vídeos
+- Três níveis: Alta, Média, Baixa
+- Compressão de vídeo e áudio
+- Otimização automática
