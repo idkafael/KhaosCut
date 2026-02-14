@@ -188,7 +188,7 @@ export default function Agradecimento() {
             {/* Nota de Ajuda */}
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-500">
-                Problemas para acessar? <span className="text-green-600 font-medium">Clique em "Ajuda"</span> para falar no WhatsApp
+                Problemas para acessar? <span className="text-green-600 font-medium">Clique em &quot;Ajuda&quot;</span> para falar no WhatsApp
               </p>
             </div>
           </div>

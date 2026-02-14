@@ -24,6 +24,16 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['@ffmpeg/ffmpeg', '@ffmpeg/util'],
   },
+  // Desabilitar ESLint durante o build (apenas warnings, não erros críticos)
+  eslint: {
+    // Avisa mas não falha o build em produção
+    ignoreDuringBuilds: false,
+  },
+  // Desabilitar TypeScript check durante o build se necessário
+  typescript: {
+    // Avisa mas não falha o build em produção
+    ignoreBuildErrors: false,
+  },
 }
 
 module.exports = nextConfig
