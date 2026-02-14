@@ -149,8 +149,8 @@ export async function processVideo(
     // Converter FileData para Blob
     // readFile retorna Uint8Array ou string, verificar tipo e converter
     if (data instanceof Uint8Array) {
-      const arrayBuffer = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
-      return new Blob([arrayBuffer], { type: file.type || 'video/mp4' });
+      // Uint8Array é diretamente compatível com Blob
+      return new Blob([data], { type: file.type || 'video/mp4' });
     } else {
       // Se for string, converter para Blob diretamente
       return new Blob([data], { type: file.type || 'video/mp4' });
