@@ -23,11 +23,14 @@ function getAllKeys(): string[] {
         .filter(k => k.length > 0);
       if (keys.length > 0) {
         console.log(`✅ Usando ${keys.length} keys da variável de ambiente`);
+        console.log(`Primeira key: ${keys[0]?.substring(0, 20)}...`);
         return keys;
       }
     } catch (error) {
       console.error('Erro ao ler keys da variável de ambiente:', error);
     }
+  } else {
+    console.log('⚠️  Variável VALID_KEYS não encontrada, usando fallback para arquivo');
   }
 
   // Fallback: ler do arquivo
@@ -126,11 +129,19 @@ export async function validateKey(key: string, removeAfterUse: boolean = false):
 
   // Obter todas as keys válidas
   const validKeys = getAllKeys();
+  console.log(`🔍 Validando key: ${key.substring(0, 20)}...`);
+  console.log(`📊 Total de keys válidas: ${validKeys.length}`);
   
   // Verificar se a key está na lista
   const isValid = validKeys.includes(key);
   
   if (!isValid) {
+    console.log(`❌ Key não encontrada na lista`);
+    // Debug: verificar se há keys similares
+    const similar = validKeys.filter(k => k.substring(0, 10) === key.substring(0, 10));
+    if (similar.length > 0) {
+      console.log(`💡 Encontradas ${similar.length} keys similares (primeiros 10 chars)`);
+    }
     return false;
   }
 

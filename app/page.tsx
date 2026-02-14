@@ -1,17 +1,14 @@
 'use client';
 
-import KeyAuth from '@/components/KeyAuth';
 import FileUpload from '@/components/FileUpload';
 import CropConfig from '@/components/CropConfig';
 import CompressionConfig from '@/components/CompressionConfig';
 import ProgressBar from '@/components/ProgressBar';
 import DownloadButton from '@/components/DownloadButton';
-import { useKeyAuth } from '@/hooks/useKeyAuth';
 import { useCropProcessing } from '@/hooks/useCropProcessing';
 import { useCompression } from '@/hooks/useCompression';
 
 export default function Home() {
-  const { isAuthenticated, validateKey, logout } = useKeyAuth();
   const {
     files,
     setFiles,
@@ -45,11 +42,6 @@ export default function Home() {
     reset: resetCompression,
   } = useCompression();
 
-  const handleKeyValid = async (key: string) => {
-    const isValid = await validateKey(key);
-    return isValid;
-  };
-
   const handleCropProcess = async () => {
     if (files.length === 0 || !pixels || pixels <= 0) {
       alert('Por favor, selecione arquivos e defina a quantidade de pixels');
@@ -66,29 +58,15 @@ export default function Home() {
     await processCompressionFiles();
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background-primary">
-        <KeyAuth onKeyValid={handleKeyValid} />
-      </div>
-    );
-  }
-
   return (
     <main className="min-h-screen bg-background-primary p-8">
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <div className="text-center flex-1">
+        <div className="flex justify-center items-center mb-8">
+          <div className="text-center">
             <h1 className="text-4xl font-bold mb-2 text-gradient-purple">
               Khaos Helper
             </h1>
           </div>
-          <button
-            onClick={logout}
-            className="px-4 py-2 bg-background-secondary hover:bg-background-card text-text-secondary border border-border-default rounded-lg transition-colors text-sm"
-          >
-            Sair
-          </button>
         </div>
 
         {/* Seção de Corte */}
